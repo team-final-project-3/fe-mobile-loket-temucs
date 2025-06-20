@@ -10,33 +10,39 @@ const styles = StyleSheet.create({
   navigationHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center', // Memusatkan judul
+    justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 15,
-    backgroundColor: COLORS.PRIMARY_ORANGE, // Warna oranye seperti di gambar
-    position: 'relative', // Diperlukan agar tombol kembali bisa diposisikan absolut
-    height: 60, // Tinggi tetap untuk header
+    backgroundColor: COLORS.PRIMARY_ORANGE, // Warna oranye tetap menjadi dasar
+    position: 'relative',
+    height: 60,
+    overflow: 'hidden', // Penting untuk memastikan pola tidak keluar dari header
+  },
+  // Style BARU untuk gambar pola di header
+  headerPatternImage: {
+    opacity: 0.1, // Membuat pola terlihat subtle (samar)
   },
   backButton: {
-    position: 'absolute', // Posisikan di kiri
+    position: 'absolute',
     left: 15,
-    padding: 5, // Area sentuh yang lebih besar
+    padding: 5,
+    zIndex: 1, // Memastikan tombol tetap di atas pola
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.textLight, // Teks warna putih
+    color: COLORS.textLight,
   },
   // Card biru di bagian atas
   headerCard: {
     backgroundColor: COLORS.primary,
     paddingVertical: 20,
-    paddingBottom: 40, // Beri ruang lebih di bawah untuk lekukan
+    paddingBottom: 40,
     alignItems: 'center',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     elevation: 5,
-    zIndex: 1, // Pastikan card ini di atas container info
+    zIndex: 1,
   },
   iconContainer: {
     width: 80,
@@ -52,24 +58,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.textLight,
   },
-  // Container putih untuk semua informasi di bawah header card
+  // Container putih untuk semua informasi
   infoContainer: {
     backgroundColor: COLORS.background,
     borderRadius: 10,
-    paddingHorizontal: 20, // Padding tetap ada agar konten di dalamnya tidak menempel ke tepi layar
+    paddingHorizontal: 20,
     paddingVertical: 10,
     elevation: 4,
-    marginTop: -20, // Tarik container ini ke atas agar menumpuk di bawah lekukan header
+    marginTop: -20,
+    marginHorizontal: 15, // Menambahkan margin agar kartu tidak menempel di tepi layar
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  // Setiap baris informasi (Lokasi, Jam, dll)
+  // Setiap baris informasi
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 20, // Padding vertikal untuk memberi jarak
+    paddingVertical: 20,
   },
   infoIcon: {
     marginRight: 20,
@@ -80,19 +87,18 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 14,
     color: COLORS.TEXT_GRAY,
-    fontWeight: '600', // Sedikit tebal
+    fontWeight: '600',
     marginBottom: 4,
-    textTransform: 'uppercase', // Sesuai desain
+    textTransform: 'uppercase',
   },
   infoValue: {
     fontSize: 16,
     color: COLORS.BLACK,
   },
-  // Garis pemisah antar infoRow
+  // Garis pemisah
   separator: {
     height: 1,
     backgroundColor: COLORS.SEPARATOR,
-    // marginHorizontal dihapus agar garis pemisah membentang selebar kontainer
   },
 });
 

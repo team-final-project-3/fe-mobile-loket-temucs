@@ -1,120 +1,208 @@
-import React, { useState } from 'react';
-import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, TextInput, FlatList } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import styles from './style';
-import { COLORS } from '../Constant/colors';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StatusBar,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
+import base64 from "base-64";
 
-const initialServices = [
-    { id: '1', name: 'Buat Tabungan' },
-    { id: '2', name: 'Setor Tunai' },
-    { id: '3', name: 'Tarik Tunai' },
-    { id: '4', name: 'Transfer' },
-    { id: '5', name: 'Layanan Customer Service' },
-    { id: '6', name: 'Pengaduan Masalah' },
-    { id: '7', name: 'Pembukaan Rekening Giro' },
-    { id: '8', name: 'Aktivasi Mobile Banking' },
-    { id: '9', name: 'Pinjaman' },
-    { id: '10', name: 'Investasi' },
-];
+import styles from "./style";
+import { COLORS } from "../Constant/colors";
 
-const LayananAntreanScreen = ({ navigation }) => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedServices, setSelectedServices] = useState([]);
+const LayananAntreanScreen = ({ navigation, route }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [branchName, setBranchName] = useState("");
+  const [branchAddress, setBranchAddress] = useState("");
 
-    const filteredServices = initialServices.filter(service =>
-        service.name.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    const fetchProfileAndServices = async () => {
+      try {
+        const token = await AsyncStorage.getItem("userToken");
+        if (!token) {
+          Alert.alert("Error", "Token tidak ditemukan. Silakan login kembali.");
+          setLoading(false);
+          return;
+        }
+
+        const decoded = JSON.parse(base64.decode(token.split(".")[1]));
+        const loketId = decoded?.loketId;
+        if (!loketId) {
+          Alert.alert("Error", "loketId tidak ditemukan dalam token.");
+          setLoading(false);
+          return;
+        }
+
+        // Fetch profile data
+        const profileResponse = await fetch(
+          `https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (!profileResponse.ok) {
+          const errorText = await profileResponse.text();
+          throw new Error(`Gagal mengambil profil: ${profileResponse.status} ${errorText}`);
+        }
+
+        const profileData = await profileResponse.json();
+        setBranchName(profileData?.loket?.name || "-");
+        setBranchAddress(profileData?.loket?.branch?.address || "-");
+
+        // Fetch services
+        const servicesResponse = await fetch(
+          "https://temucs-tzaoj.ondigitalocean.app/api/service/loket",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (!servicesResponse.ok) {
+          const errorText = await servicesResponse.text();
+          throw new Error(`Gagal mengambil layanan: ${servicesResponse.status} ${errorText}`);
+        }
+
+        const servicesData = await servicesResponse.json();
+        setServices(servicesData);
+      } catch (error) {
+        Alert.alert("Error", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileAndServices();
+  }, []);
+
+  const filteredServices = services
+    .filter((service) => service.status === true)
+    .filter((service) =>
+      service.serviceName.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleSelectService = (service) => {
-        const isSelected = selectedServices.some(s => s.id === service.id);
+  const handleSelectService = (service) => {
+    const isSelected = selectedServices.some((s) => s.id === service.id);
+    if (isSelected) {
+      setSelectedServices(selectedServices.filter((s) => s.id !== service.id));
+    } else {
+      setSelectedServices([...selectedServices, service]);
+    }
+  };
 
-        if (isSelected) {
-            setSelectedServices(selectedServices.filter(s => s.id !== service.id));
-        } else {
-            setSelectedServices([...selectedServices, service]);
-        }
-    };
+  const handleNext = () => {
+    if (selectedServices.length === 0) {
+      Alert.alert("Perhatian", "Silakan pilih minimal satu layanan.");
+      return;
+    }
 
-    const handleNext = () => {
-        // Cek apakah ada layanan yang dipilih
-        if (selectedServices.length === 0) {
-            alert('Silakan pilih minimal satu layanan.');
-            return;
-        }
-        
-        // === PERUBAHAN DI SINI ===
-        // Navigasi ke halaman Dokumen Persyaratan dan kirim data layanan yang dipilih
-        navigation.navigate('DokumenPersyaratan', {
-            selectedServices: selectedServices
-        });
-    };
+    const { namaLengkap, email, noTelepon } = route.params || {};
+    navigation.navigate("DokumenPersyaratan", {
+      selectedServices,
+      namaLengkap,
+      email,
+      noTelepon,
+    });
+  };
 
-    const renderServiceItem = ({ item }) => {
-        const isSelected = selectedServices.some(s => s.id === item.id);
-
-        return (
-            <TouchableOpacity 
-                style={styles.serviceItem} 
-                onPress={() => handleSelectService(item)}
-            >
-                <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-                    {isSelected && <Ionicons name="checkmark" size={16} color="white" />}
-                </View>
-                <Text style={styles.serviceName}>{item.name}</Text>
-            </TouchableOpacity>
-        );
-    };
+  const renderServiceItem = ({ item }) => {
+    const isSelected = selectedServices.some((s) => s.id === item.id);
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={COLORS.PRIMARY_ORANGE} />
-
-            <View style={styles.navigationHeader}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="chevron-back-outline" size={24} color={COLORS.background} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Ambil Antrean</Text>
-            </View>
-
-            <View style={styles.staticContent}>
-                <View style={styles.branchInfoCard}>
-                    <Text style={styles.branchName}>BNI Kota</Text>
-                    <Text style={styles.branchAddress}>Jl. Jendral Sudirman No. 58, Jakarta Pusat</Text>
-                </View>
-                <View style={styles.queueStatsContainer}>
-                    <View style={[styles.statBox, styles.borderServed]}><Text style={styles.statLabel}>Terakhir Dilayani</Text><Text style={[styles.statValue, styles.valueServed]}>KT-008</Text></View>
-                    <View style={[styles.statBox, styles.borderWaiting]}><Text style={styles.statLabel}>Menunggu</Text><Text style={[styles.statValue, styles.valueWaiting]}>2</Text></View>
-                    <View style={[styles.statBox, styles.borderTotal]}><Text style={styles.statLabel}>Jumlah Antrian</Text><Text style={[styles.statValue, styles.valueTotal]}>10</Text></View>
-                </View>
-            </View>
-
-            <View style={styles.scrollableContent}>
-                <Text style={styles.selectionTitle}>Butuh Layanan apa?</Text>
-                <View style={styles.searchContainer}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Cari jenis layanan"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                    />
-                    <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-                </View>
-
-                <FlatList
-                    data={filteredServices}
-                    renderItem={renderServiceItem}
-                    keyExtractor={item => item.id}
-                    style={styles.serviceList}
-                />
-            </View>
-            
-            <View style={styles.footer}>
-                <TouchableOpacity style={styles.submitButton} onPress={handleNext}>
-                    <Text style={styles.submitButtonText}>Selanjutnya</Text>
-                </TouchableOpacity>
-            </View>
-        </SafeAreaView>
+      <TouchableOpacity
+        style={styles.serviceItem}
+        onPress={() => handleSelectService(item)}
+      >
+        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+          {isSelected && <Ionicons name="checkmark" size={16} color="white" />}
+        </View>
+        <Text style={styles.serviceName}>{item.serviceName}</Text>
+      </TouchableOpacity>
     );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={COLORS.PRIMARY_ORANGE}
+      />
+
+      {/* Header */}
+      <View style={styles.navigationHeader}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons
+            name="chevron-back-outline"
+            size={24}
+            color={COLORS.background}
+          />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Ambil Antrean</Text>
+      </View>
+
+      {/* Informasi Cabang */}
+      <View style={styles.staticContent}>
+        <View style={styles.branchInfoCard}>
+          <Text style={styles.branchName}>{branchName}</Text>
+          <Text style={styles.branchAddress}>{branchAddress}</Text>
+        </View>
+
+        <View style={styles.queueStatsContainer}>
+          <View style={[styles.statBox, styles.borderServed]}>
+            <Text style={styles.statLabel}>Terakhir Dilayani</Text>
+            <Text style={[styles.statValue, styles.valueServed]}>KT-008</Text>
+          </View>
+          <View style={[styles.statBox, styles.borderTotal]}>
+            <Text style={styles.statLabel}>Jumlah Antrian</Text>
+            <Text style={[styles.statValue, styles.valueTotal]}>10</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Pilihan Layanan */}
+      <View style={styles.scrollableContent}>
+        <Text style={styles.selectionTitle}>Butuh Layanan apa?</Text>
+
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cari jenis layanan"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+        </View>
+
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color={COLORS.PRIMARY_ORANGE}
+            style={{ marginTop: 20 }}
+          />
+        ) : (
+          <FlatList
+            data={filteredServices}
+            renderItem={renderServiceItem}
+            keyExtractor={(item) => item.id.toString()}
+            style={styles.serviceList}
+          />
+        )}
+      </View>
+
+      {/* Tombol Selanjutnya */}
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.submitButton} onPress={handleNext}>
+          <Text style={styles.submitButtonText}>Selanjutnya</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 export default LayananAntreanScreen;

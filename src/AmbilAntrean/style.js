@@ -2,9 +2,10 @@ import { StyleSheet } from 'react-native';
 import { COLORS } from '../Constant/colors';
 
 const styles = StyleSheet.create({
+    // ... (semua style lain tetap sama) ...
     container: {
         flex: 1,
-        backgroundColor: '#F0F2F5', // Warna background abu-abu muda
+        backgroundColor: '#F0F2F5',
     },
     navigationHeader: {
         flexDirection: 'row',
@@ -14,7 +15,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         backgroundColor: COLORS.PRIMARY_ORANGE,
         position: 'relative',
-        height: 60, // Tinggi tetap untuk header
+        height: 60,
     },
     backButton: {
         position: 'absolute',
@@ -24,23 +25,24 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: COLORS.textLight,
+        color: 'white',
     },
     contentWrapper: {
         padding: 20,
     },
-
+    branchInfoCard: {
+        marginBottom: 20,
+    },
     branchName: {
         fontSize: 35,
         fontWeight: 'bold',
         color: '#053F5C',
-        height: 40, // Tinggi tetap untuk nama cabang
     },
     branchAddress: {
         fontSize: 14,
         color: '#555',
         marginTop: 4,
-        height: 65, // Tinggi tetap untuk alamat cabang
+        marginBottom: 16,
     },
     queueStatsContainer: {
         flexDirection: 'row',
@@ -57,15 +59,14 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
         backgroundColor: 'white',
     },
-    // Style BARU untuk border
     borderServed: {
-        borderColor: '#429EBD', // Biru
+        borderColor: '#429EBD',
     },
     borderWaiting: {
-        borderColor: COLORS.PRIMARY_ORANGE, // Oranye
+        borderColor: COLORS.PRIMARY_ORANGE,
     },
     borderTotal: {
-        borderColor: '#A9A9A9', // Abu-abu
+        borderColor: '#A9A9A9',
     },
     statLabel: {
         fontSize: 12,
@@ -76,15 +77,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 5,
     },
-    // Style BARU untuk warna nilai
     valueServed: {
-        color: '#429EBD', // Biru
+        color: '#429EBD',
     },
     valueWaiting: {
-        color: COLORS.PRIMARY_ORANGE, // Oranye
+        color: COLORS.PRIMARY_ORANGE,
     },
     valueTotal: {
-        color: '#666', // Abu-abu tua
+        color: '#666',
     },
     formContainer: {
         backgroundColor: COLORS.PRIMARY_ORANGE,
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     inputGroup: {
-        marginBottom: 15,
+        marginBottom: 10,
     },
     inputLabel: {
         color: 'white',
@@ -119,8 +119,24 @@ const styles = StyleSheet.create({
         borderColor: 'red',
         borderWidth: 1,
     },
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 5,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: 'white',
+    },
+    dividerText: {
+        color: 'white',
+        marginHorizontal: 10,
+        fontSize: 12,
+    },
+
     submitButton: {
-        backgroundColor: '#28A745', // Warna hijau
+        backgroundColor: '#28A745',
         padding: 18,
         borderRadius: 10,
         alignItems: 'center',

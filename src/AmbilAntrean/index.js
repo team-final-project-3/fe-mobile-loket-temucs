@@ -1,122 +1,209 @@
-import React, { useState } from 'react';
-import { View, Text, SafeAreaView, StatusBar, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StatusBar,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+  Alert
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import base64 from 'base-64'; // <-- PERBAIKAN: Import base-64
 import styles from './style';
 import { COLORS } from '../Constant/colors';
 
 const AmbilAntreanScreen = ({ navigation }) => {
-    const [namaLengkap, setNamaLengkap] = useState('');
-    const [email, setEmail] = useState('');
-    const [noTelepon, setNoTelepon] = useState('');
-    const [namaError, setNamaError] = useState(''); // State untuk pesan error
+  const [namaLengkap, setNamaLengkap] = useState('');
+  const [email, setEmail] = useState('');
+  const [noTelepon, setNoTelepon] = useState('');
+  const [namaError, setNamaError] = useState('');
+  const [contactError, setContactError] = useState('');
+  const [branchName, setBranchName] = useState('');
+  const [branchAddress, setBranchAddress] = useState('');
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
-    const handleAmbilAntrean = () => {
-        // Karena spasi sudah dihilangkan saat input, kita hanya perlu cek apakah field kosong.
-        const trimmedName = namaLengkap.trim();
-
-        if (!trimmedName) {
-            setNamaError('Nama lengkap tidak boleh kosong.');
-            return;
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) {
+          console.error('Token tidak tersedia');
+          setLoadingProfile(false);
+          return;
         }
-        
-        // Validasi spasi tidak lagi diperlukan di sini
-        setNamaError('');
-        console.log({ namaLengkap: trimmedName, email, noTelepon });
-        
-        // === PERUBAHAN DI SINI ===
-        // Mengganti Alert dengan navigasi ke halaman LayananAntrean
-        navigation.navigate('LayananAntrean');
+
+        // <-- PERBAIKAN: Menggunakan base64.decode sebagai pengganti atob -->
+        const decoded = JSON.parse(base64.decode(token.split('.')[1]));
+        const loketId = decoded?.loketId;
+
+        if (!loketId) {
+          console.error('loketId tidak ditemukan dalam token');
+          setLoadingProfile(false);
+          return;
+        }
+
+        const response = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('Gagal mengambil data profil:', data?.message || data);
+          setLoadingProfile(false);
+          return;
+        }
+
+        const loketName = data?.loket?.name || 'Nama Cabang';
+        const address = data?.loket?.branch?.address || 'Alamat belum tersedia';
+        setBranchName(loketName);
+        setBranchAddress(address);
+      } catch (error) {
+        console.error('Terjadi kesalahan saat fetch profile:', error);
+        Alert.alert('Error', 'Gagal memuat data cabang.');
+      } finally {
+        setLoadingProfile(false);
+      }
     };
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={COLORS.PRIMARY_ORANGE} />
+    fetchProfileData();
+  }, []);
 
-            {/* Header Navigasi */}
-            <View style={styles.navigationHeader}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <Ionicons name="chevron-back-outline" size={24} color={COLORS.background} />
-            </TouchableOpacity>
-                <Text style={styles.headerTitle}>Ambil Antrean</Text>
+  const handleAmbilAntrean = () => {
+    const trimmedName = namaLengkap.trim();
+    const trimmedEmail = email.trim();
+    const trimmedNoTelepon = noTelepon.trim();
+
+    let isValid = true;
+
+    if (!trimmedName) {
+      setNamaError('Nama lengkap tidak boleh kosong.');
+      isValid = false;
+    } else {
+      setNamaError('');
+    }
+
+    if (!trimmedEmail && !trimmedNoTelepon) {
+      setContactError('Wajib isi salah satu: Email atau No Telepon.');
+      isValid = false;
+    } else {
+      setContactError('');
+    }
+
+    if (!isValid) {
+      return;
+    }
+
+    navigation.navigate('LayananAntrean', {
+      namaLengkap: trimmedName,
+      email: trimmedEmail,
+      noTelepon: trimmedNoTelepon,
+    });
+  };
+
+  if (loadingProfile) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={COLORS.PRIMARY_ORANGE} />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.PRIMARY_ORANGE} />
+      <View style={styles.navigationHeader}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="chevron-back-outline" size={24} color={'white'} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Ambil Antrean</Text>
+      </View>
+      <ScrollView>
+        <View style={styles.contentWrapper}>
+          <View style={styles.branchInfoCard}>
+            <Text style={styles.branchName}>{branchName}</Text>
+            <Text style={styles.branchAddress}>{branchAddress}</Text>
+          </View>
+          <View style={styles.queueStatsContainer}>
+            <View style={[styles.statBox, styles.borderServed]}>
+              <Text style={styles.statLabel}>Terakhir Dilayani</Text>
+              <Text style={[styles.statValue, styles.valueServed]}>KT-008</Text>
             </View>
 
-            <ScrollView>
-                <View style={styles.contentWrapper}>
-                    {/* Info Cabang */}
-                    <View style={styles.branchInfoCard}>
-                        <Text style={styles.branchName}>BNI Kota</Text>
-                        <Text style={styles.branchAddress}>Jl. Jendral Sudirman No. 58, Jakarta Pusat</Text>
-                    </View>
+            <View style={[styles.statBox, styles.borderTotal]}>
+              <Text style={styles.statLabel}>Jumlah Antrian</Text>
+              <Text style={[styles.statValue, styles.valueTotal]}>10</Text>
+            </View>
+          </View>
 
-                    {/* Info Antrean */}
-                    <View style={styles.queueStatsContainer}>
-                        {/* Box 1: Terakhir Dilayani */}
-                        <View style={[styles.statBox, styles.borderServed]}>
-                            <Text style={styles.statLabel}>Terakhir Dilayani</Text>
-                            <Text style={[styles.statValue, styles.valueServed]}>KT-008</Text>
-                        </View>
-                        {/* Box 2: Menunggu */}
-                        <View style={[styles.statBox, styles.borderWaiting]}>
-                            <Text style={styles.statLabel}>Menunggu</Text>
-                            <Text style={[styles.statValue, styles.valueWaiting]}>2</Text>
-                        </View>
-                        {/* Box 3: Jumlah Antrian */}
-                        <View style={[styles.statBox, styles.borderTotal]}>
-                            <Text style={styles.statLabel}>Jumlah Antrian</Text>
-                            <Text style={[styles.statValue, styles.valueTotal]}>10</Text>
-                        </View>
-                    </View>
+          <View style={styles.formContainer}>
+            <Text style={styles.formTitle}>DATA NASABAH</Text>
 
-                    {/* Form Data Nasabah */}
-                    <View style={styles.formContainer}>
-                        <Text style={styles.formTitle}>DATA NASABAH</Text>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Nama Lengkap *</Text>
-                           <TextInput
-    style={[styles.input, namaError ? styles.inputError : null]}
-    value={namaLengkap}
-    onChangeText={(text) => {
-        setNamaLengkap(text); 
-        if (namaError) {
-            setNamaError('');
-        }
-    }}
-    placeholder={namaError || "Masukkan nama lengkap Anda"}
-    placeholderTextColor={namaError ? 'red' : '#999'}
-/>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Nama Lengkap *</Text>
+              <TextInput
+                style={[styles.input, namaError ? styles.inputError : null]}
+                value={namaLengkap}
+                onChangeText={(text) => {
+                  setNamaLengkap(text);
+                  if (namaError) setNamaError('');
+                }}
+                placeholder={namaError || 'Masukkan nama lengkap Anda'}
+                placeholderTextColor={namaError ? 'red' : '#999'}
+              />
+            </View>
 
-                        </View>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>Email (opsional)</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={email}
-                                onChangeText={setEmail}
-                                placeholder="Masukkan email Anda"
-                                keyboardType="email-address"
-                            />
-                        </View>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.inputLabel}>No Telepon (opsional)</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={noTelepon}
-                                onChangeText={setNoTelepon}
-                                placeholder="Masukkan nomor telepon Anda"
-                                keyboardType="phone-pad"
-                            />
-                        </View>
-                    </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <TextInput
+                style={[styles.input, contactError ? styles.inputError : null]}
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  if (contactError) setContactError('');
+                }}
+                placeholder={contactError || "Masukkan email Anda"}
+                placeholderTextColor={contactError ? 'red' : '#999'}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-                    {/* Tombol Aksi */}
-                    <TouchableOpacity style={styles.submitButton} onPress={handleAmbilAntrean}>
-                        <Text style={styles.submitButtonText}>Ambil Antrean</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
-    );
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>Atau</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>No Telepon</Text>
+              <TextInput
+                style={[styles.input, contactError ? styles.inputError : null]}
+                value={noTelepon}
+                onChangeText={(text) => {
+                  setNoTelepon(text);
+                  if (contactError) setContactError('');
+                }}
+                placeholder={contactError || "Masukkan nomor telepon Anda"}
+                placeholderTextColor={contactError ? 'red' : '#999'}
+                keyboardType="phone-pad"
+              />
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.submitButton} onPress={handleAmbilAntrean}>
+            <Text style={styles.submitButtonText}>Ambil Antrean</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 };
 
 export default AmbilAntreanScreen;

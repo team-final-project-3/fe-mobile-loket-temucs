@@ -6,6 +6,7 @@ import {
   StatusBar,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground, // 1. Import ImageBackground
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,15 +17,19 @@ import { COLORS } from '../Constant/colors';
 const ProfileScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
-  const [loading, setLoading] = useState(true); // Tambahkan loading state
+  const [loading, setLoading] = useState(true);
 
   const fetchProfileData = async () => {
+    // Set loading to true each time we fetch
+    setLoading(true);
     try {
       const token = await AsyncStorage.getItem('userToken');
       console.log("Token:", token);
 
       if (!token) {
         console.error("Token tidak tersedia");
+        // Make sure to stop loading on error
+        setLoading(false);
         return;
       }
 
@@ -33,12 +38,14 @@ const ProfileScreen = ({ navigation }) => {
 
       if (!loketId) {
         console.error("loketId tidak ditemukan dalam token");
+        // Make sure to stop loading on error
+        setLoading(false);
         return;
       }
 
-      const response = await fetch(`https://3fd5pjgv-3000.asse.devtunnels.ms/api/loket/${loketId}/profile`, {
+      const response = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`, {
         headers: {
-          Authorization: `Bearer ${token}`, // Pastikan token dikirim
+          Authorization: `Bearer ${token}`,
         },
       });
       const data = await response.json();
@@ -54,14 +61,22 @@ const ProfileScreen = ({ navigation }) => {
     } catch (error) {
       console.error("Terjadi kesalahan:", error);
     } finally {
+      // Always stop loading at the end
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProfileData();
-  }, []);
+    // This listener will re-fetch data every time the screen comes into focus
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchProfileData();
+    });
 
+    // Cleanup the listener when the component unmounts
+    return unsubscribe;
+  }, [navigation]);
+
+  // Show a loading indicator while fetching data
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -73,12 +88,19 @@ const ProfileScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.PRIMARY_ORANGE} />
-      <View style={styles.navigationHeader}>
+      
+      {/* 2. Replace View with ImageBackground */}
+      <ImageBackground
+        source={{ uri: 'https://www.transparenttextures.com/patterns/gplay.png' }} // A subtle pattern from a reliable source
+        style={styles.navigationHeader}
+        imageStyle={styles.headerPatternImage} // Style for the pattern image itself
+        resizeMode="repeat" // Ensures the pattern tiles correctly
+      >
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="chevron-back-outline" size={24} color={COLORS.background} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
-      </View>
+      </ImageBackground>
 
       <View style={styles.headerCard}>
         <View style={styles.iconContainer}>

@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Impor semua komponen layar Anda
+
 import LoginScreen from './src/Login';
 import DashboardScreen from './src/Dashboard';
 import ProfileScreen from './src/Profile';
@@ -11,6 +11,8 @@ import AmbilAntreanScreen from './src/AmbilAntrean';
 import LayananAntreanScreen from './src/LayananAntrean';
 import DokumenPersyaratanScreen from './src/DokumenPersyaratan';
 import TicketScreen from './src/Ticket';
+import TermsAndConditionsScreen from './src/TermsAndConditionsScreen'; 
+import PrivacyPolicyScreen from './src/PrivacyPolicyScreen'; 
 
 // Buat navigator stack
 const Stack = createNativeStackNavigator();
@@ -50,11 +52,14 @@ export default function App() {
             <Stack.Screen name="Ticket" component={TicketScreen} />
           </>
         ) : (
-          // Jika pengguna belum login, tampilkan Login
-          <Stack.Screen name="Login">
-            {(props) => <LoginScreen {...props} onLoginSuccess={handleLoginSuccess} />}
-          </Stack.Screen>
-          
+          // Jika pengguna belum login, tampilkan Login dan Terms and Conditions
+          <>
+            <Stack.Screen name="Login">
+              {(props) => <LoginScreen {...props} onLoginSuccess={handleLoginSuccess} />}
+            </Stack.Screen>
+            <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} /> 
+            <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} /> 
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

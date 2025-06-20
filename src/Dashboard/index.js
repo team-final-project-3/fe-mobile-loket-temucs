@@ -3,6 +3,7 @@ import {
   View,
   Text,
   SafeAreaView,
+  StatusBar,
   TouchableOpacity,
   TextInput,
   FlatList,
@@ -16,7 +17,7 @@ import { id } from 'date-fns/locale';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 
-const API_URL = 'https://3fd5pjgv-3000.asse.devtunnels.ms/';
+const API_URL = 'https://temucs-tzaoj.ondigitalocean.app';
 
 const initialQueueData = [
   { id: '1', noTiket: 'B-001', nama: 'Via Uni Rosa Sianipar', status: 'Online', waktu: '17:00 PM' },
@@ -37,6 +38,7 @@ export default function DashboardScreen({ navigation, onLogout }) {
   const [queueData, setQueueData] = useState(initialQueueData);
   const [greeting, setGreeting] = useState('Memuat...');
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [currentQueueNumber, setCurrentQueueNumber] = useState('Memuat...');
 
   const formattedDate = format(new Date(), 'EEEE, d MMMM yyyy', { locale: id });
 
@@ -75,6 +77,50 @@ export default function DashboardScreen({ navigation, onLogout }) {
     };
 
     fetchGreetingFromToken();
+  }, []);
+
+  useEffect(() => {
+    const fetchCurrentQueueNumber = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) throw new Error('Token tidak ditemukan');
+
+        const response = await fetch(`${API_URL}/api/queue`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error('Gagal mengambil data antrean');
+
+        const json = await response.json();
+        const data = json.data;
+
+        if (!Array.isArray(data)) throw new Error('Format data tidak sesuai');
+
+        const inProgressQueue = data.filter(item => {
+          const logs = item.queueLogs || [];
+          if (logs.length === 0) return false;
+          const latestLog = logs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+          return latestLog.status === 'in progress';
+        });
+
+        if (inProgressQueue.length > 0) {
+          const last = inProgressQueue.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+          setCurrentQueueNumber(last.ticketNumber || 'Tidak Diketahui');
+        } else if (data.length > 0) {
+          const lastQueue = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+          setCurrentQueueNumber(lastQueue.ticketNumber || '0');
+        } else {
+          setCurrentQueueNumber('0');
+        }
+      } catch (error) {
+        console.error('Gagal mengambil antrean saat ini:', error);
+        setCurrentQueueNumber('Gagal memuat');
+      }
+    };
+
+    fetchCurrentQueueNumber();
   }, []);
 
   useEffect(() => {
@@ -140,6 +186,20 @@ export default function DashboardScreen({ navigation, onLogout }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#F27F0C" />
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.profileIcon}
+          onPress={() => navigation?.navigate?.('Profile')}
+        >
+          <Ionicons name="person-circle" size={40} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => setLogoutModalVisible(true)}>
+          <Ionicons name="exit-outline" size={18} color="white" />
+          <Text style={styles.logoutButtonText}>Keluar</Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal
         transparent
         animationType="fade"
@@ -179,26 +239,13 @@ export default function DashboardScreen({ navigation, onLogout }) {
       </Modal>
 
       <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.profileIcon}
-            onPress={() => navigation?.navigate?.('Profile')}
-          >
-            <Ionicons name="person-circle" size={40} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.logoutButton} onPress={() => setLogoutModalVisible(true)}>
-            <Ionicons name="exit-outline" size={18} color="white" />
-            <Text style={styles.logoutButtonText}>Keluar</Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.contentWrapper}>
           <Text style={styles.welcomeText}>{greeting}</Text>
           <Text style={styles.dateText}>{formattedDate}</Text>
 
           <View style={styles.currentQueueCard}>
             <Text style={styles.currentQueueTitle}>No antrean saat ini:</Text>
-            <Text style={styles.currentQueueNumber}>B-0008</Text>
+            <Text style={styles.currentQueueNumber}>{currentQueueNumber}</Text>
           </View>
 
           <TouchableOpacity
@@ -231,9 +278,7 @@ export default function DashboardScreen({ navigation, onLogout }) {
                 <Text style={[styles.tableHeaderText, { flex: 1.5 }]}>No Tiket</Text>
                 <Text style={[styles.tableHeaderText, { flex: 3 }]}>Nama</Text>
                 <Text style={[styles.tableHeaderText, { flex: 2 }]}>Status</Text>
-                <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>
-                  Waktu Datang
-                </Text>
+                <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>Waktu Datang</Text>
               </View>
               <FlatList
                 data={queueData}
