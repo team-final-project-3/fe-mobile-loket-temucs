@@ -1,3 +1,4 @@
+// ...import statements
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -24,9 +25,11 @@ const LayananAntreanScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [branchName, setBranchName] = useState("");
   const [branchAddress, setBranchAddress] = useState("");
+  const [lastInProgressTicket, setLastInProgressTicket] = useState("Memuat...");
+  const [totalQueue, setTotalQueue] = useState("Memuat...");
 
   useEffect(() => {
-    const fetchProfileAndServices = async () => {
+    const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
         if (!token) {
@@ -37,13 +40,14 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
         const decoded = JSON.parse(base64.decode(token.split(".")[1]));
         const loketId = decoded?.loketId;
+
         if (!loketId) {
           Alert.alert("Error", "loketId tidak ditemukan dalam token.");
           setLoading(false);
           return;
         }
 
-        // Fetch profile data
+        // Fetch Profile
         const profileResponse = await fetch(
           `https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -58,7 +62,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         setBranchName(profileData?.loket?.name || "-");
         setBranchAddress(profileData?.loket?.branch?.address || "-");
 
-        // Fetch services
+        // Fetch Services
         const servicesResponse = await fetch(
           "https://temucs-tzaoj.ondigitalocean.app/api/service/loket",
           { headers: { Authorization: `Bearer ${token}` } }
@@ -71,6 +75,26 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
         const servicesData = await servicesResponse.json();
         setServices(servicesData);
+
+        // Fetch Last Ticket In Progress
+        const lastTicketRes = await fetch(
+          "https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const lastTicketData = await lastTicketRes.json();
+        setLastInProgressTicket(
+          lastTicketRes.ok && lastTicketData?.ticketNumber ? lastTicketData.ticketNumber : "-"
+        );
+
+        // Fetch Total Queue
+        const countRes = await fetch(
+          "https://temucs-tzaoj.ondigitalocean.app/api/queue/count/loket",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const countData = await countRes.json();
+        setTotalQueue(
+          countRes.ok && typeof countData?.totalQueue === "number" ? countData.totalQueue : "-"
+        );
       } catch (error) {
         Alert.alert("Error", error.message);
       } finally {
@@ -78,7 +102,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
       }
     };
 
-    fetchProfileAndServices();
+    fetchData();
   }, []);
 
   const filteredServices = services
@@ -113,7 +137,6 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
   const renderServiceItem = ({ item }) => {
     const isSelected = selectedServices.some((s) => s.id === item.id);
-
     return (
       <TouchableOpacity
         style={styles.serviceItem}
@@ -146,7 +169,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         <Text style={styles.headerTitle}>Ambil Antrean</Text>
       </View>
 
-      {/* Informasi Cabang */}
+      {/* Info Cabang */}
       <View style={styles.staticContent}>
         <View style={styles.branchInfoCard}>
           <Text style={styles.branchName}>{branchName}</Text>
@@ -155,17 +178,21 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
         <View style={styles.queueStatsContainer}>
           <View style={[styles.statBox, styles.borderServed]}>
-            <Text style={styles.statLabel}>Terakhir Dilayani</Text>
-            <Text style={[styles.statValue, styles.valueServed]}>KT-008</Text>
+            <Text style={styles.statLabel}>Sedang Dilayani</Text>
+            <Text style={[styles.statValue, styles.valueServed]}>
+              {lastInProgressTicket}
+            </Text>
           </View>
           <View style={[styles.statBox, styles.borderTotal]}>
             <Text style={styles.statLabel}>Jumlah Antrian</Text>
-            <Text style={[styles.statValue, styles.valueTotal]}>10</Text>
+            <Text style={[styles.statValue, styles.valueTotal]}>
+              {totalQueue}
+            </Text>
           </View>
         </View>
       </View>
 
-      {/* Pilihan Layanan */}
+      {/* Layanan */}
       <View style={styles.scrollableContent}>
         <Text style={styles.selectionTitle}>Butuh Layanan apa?</Text>
 
@@ -195,7 +222,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         )}
       </View>
 
-      {/* Tombol Selanjutnya */}
+      {/* Tombol Next */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.submitButton} onPress={handleNext}>
           <Text style={styles.submitButtonText}>Selanjutnya</Text>

@@ -9,32 +9,25 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5'; // Impor FontAwesome5
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import base64 from 'base-64';
 import styles from './style';
 import { COLORS } from '../Constant/colors';
 
-// Menerima 'navigation' dan 'route' untuk data dinamis
 const TicketScreen = ({ navigation, route }) => {
-  // State untuk mengontrol visibilitas modal
   const [isModalVisible, setIsModalVisible] = useState(false);
-
-  // State untuk office name and address
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [lastInProgressTicket, setLastInProgressTicket] = useState('-');
+  const [remainingInFront, setRemainingInFront] = useState(0);
 
-  // Ambil data tiket dan queueId dari parameter route, atau gunakan nilai default
-  const { ticketData, queueId } = route.params || { 
-    ticketData: { 
-      ticketNumber: 'B-0010', 
-      date: '16/06/2025' 
-    },
-    queueId: null
+  const { ticketData, queueId } = route.params || {
+    ticketData: { ticketNumber: 'B-0010', date: '16/06/2025' },
+    queueId: null,
   };
 
-  // State for ticket detail fetched from API
   const [ticketDetail, setTicketDetail] = useState(null);
   const [loadingTicket, setLoadingTicket] = useState(true);
 
@@ -52,25 +45,39 @@ const TicketScreen = ({ navigation, route }) => {
           setLoadingTicket(false);
           return;
         }
-        const response = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/loket-ticket/${queueId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+
+        const response = await fetch(
+          `https://temucs-tzaoj.ondigitalocean.app/api/queue/loket-ticket/${queueId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         const data = await response.json();
-        if (!response.ok) {
+
+        if (response.ok) {
+          setTicketDetail(data);
+        } else {
           console.error('Gagal mengambil detail tiket:', data?.message || data);
-          setLoadingTicket(false);
-          return;
         }
-        console.log('Detail Tiket:', data);
-        setTicketDetail(data);
+
+        // Fetch antrean di depan (remaining)
+        const remainingRes = await fetch(
+          `https://temucs-tzaoj.ondigitalocean.app/api/queue/remaining/loket?queueId=${queueId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const remainingData = await remainingRes.json();
+        if (remainingRes.ok && remainingData?.remainingInFront !== undefined) {
+          setRemainingInFront(remainingData.remainingInFront);
+        }
       } catch (error) {
-        console.error('Terjadi kesalahan saat fetch detail tiket:', error);
+        console.error('Terjadi kesalahan saat fetch tiket:', error);
       } finally {
         setLoadingTicket(false);
       }
     };
+
     fetchTicketDetail();
   }, [queueId]);
 
@@ -79,7 +86,6 @@ const TicketScreen = ({ navigation, route }) => {
       try {
         const token = await AsyncStorage.getItem('userToken');
         if (!token) {
-          console.error('Token tidak tersedia');
           setBranchName('Nama Cabang');
           setBranchAddress('Alamat belum tersedia');
           setLoadingProfile(false);
@@ -90,37 +96,35 @@ const TicketScreen = ({ navigation, route }) => {
         const loketId = decoded?.loketId;
 
         if (!loketId) {
-          console.error('loketId tidak ditemukan dalam token');
           setBranchName('Nama Cabang');
           setBranchAddress('Alamat belum tersedia');
           setLoadingProfile(false);
           return;
         }
 
-        const response = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Loket profile
+        const profileRes = await fetch(
+          `https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const profileData = await profileRes.json();
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          console.error('Gagal mengambil data profil:', data?.message || data);
-          setBranchName('Nama Cabang');
-          setBranchAddress('Alamat belum tersedia');
-          setLoadingProfile(false);
-          return;
+        if (profileRes.ok) {
+          setBranchName(profileData?.loket?.name || 'Nama Cabang');
+          setBranchAddress(profileData?.loket?.branch?.address || 'Alamat belum tersedia');
         }
 
-        const loketName = data?.loket?.name || 'Nama Cabang';
-        const address = data?.loket?.branch?.address || 'Alamat belum tersedia';
-        setBranchName(loketName);
-        setBranchAddress(address);
+        // Terakhir Dilayani
+        const lastTicketRes = await fetch(
+          `https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const lastTicketData = await lastTicketRes.json();
+        if (lastTicketRes.ok && lastTicketData?.ticketNumber) {
+          setLastInProgressTicket(lastTicketData.ticketNumber);
+        }
       } catch (error) {
-        console.error('Terjadi kesalahan saat fetch profile:', error);
-        setBranchName('Nama Cabang');
-        setBranchAddress('Alamat belum tersedia');
+        console.error('Error saat fetch data:', error);
       } finally {
         setLoadingProfile(false);
       }
@@ -129,10 +133,9 @@ const TicketScreen = ({ navigation, route }) => {
     fetchProfileData();
   }, []);
 
-  // Fungsi untuk kembali ke halaman utama (Dashboard)
   const handleBackToHome = () => {
-      setIsModalVisible(false); // Tutup modal dulu
-      navigation.popToTop();   // Kembali ke layar paling atas di stack
+    setIsModalVisible(false);
+    navigation.popToTop();
   };
 
   if (loadingProfile) {
@@ -146,45 +149,29 @@ const TicketScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.PRIMARY_ORANGE} />
-      
-      {/* === MODAL SUKSES === */}
-      <Modal
-          transparent={true}
-          animationType="fade"
-          visible={isModalVisible}
-          onRequestClose={() => setIsModalVisible(false)}
-      >
-          <View style={styles.modalOverlay}>
-              <View style={styles.successModalContainer}>
-                  {/* Tombol Close (X) */}
-                  <TouchableOpacity style={styles.closeButton} onPress={() => setIsModalVisible(false)}>
-                      <Ionicons name="close" size={24} color="#888" />
-                  </TouchableOpacity>
-                  
-                  {/* Ikon Smile */}
-                  <View style={styles.successIconContainer}>
-                      <FontAwesome5 name="smile-beam" size={48} color={COLORS.background} />
-                  </View>
-
-                  <Text style={styles.successTitle}>Tiket Berhasil di Cetak</Text>
-
-                  {/* Tombol Kembali ke Beranda */}
-                  <TouchableOpacity style={styles.homeButton} onPress={handleBackToHome}>
-                      <Text style={styles.homeButtonText}>Kembali ke Beranda</Text>
-                  </TouchableOpacity>
-              </View>
+      <Modal transparent animationType="fade" visible={isModalVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.successModalContainer}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setIsModalVisible(false)}>
+              <Ionicons name="close" size={24} color="#888" />
+            </TouchableOpacity>
+            <View style={styles.successIconContainer}>
+              <FontAwesome5 name="smile-beam" size={48} color={COLORS.background} />
+            </View>
+            <Text style={styles.successTitle}>Tiket Berhasil di Cetak</Text>
+            <TouchableOpacity style={styles.homeButton} onPress={handleBackToHome}>
+              <Text style={styles.homeButtonText}>Kembali ke Beranda</Text>
+            </TouchableOpacity>
           </View>
+        </View>
       </Modal>
 
-      {/* Header Halaman */}
+      {/* Header */}
       <View style={styles.navigationHeader}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="chevron-back-outline" size={24} color={COLORS.background} />
-          </TouchableOpacity>
         <Text style={styles.headerTitle}>Tiket Antrean</Text>
       </View>
 
-      {/* Konten Halaman */}
+      {/* Konten */}
       <View style={styles.content}>
         <Text style={styles.officeName}>{branchName}</Text>
         <Text style={styles.officeAddress}>{branchAddress}</Text>
@@ -192,11 +179,11 @@ const TicketScreen = ({ navigation, route }) => {
         <View style={styles.statusBoxContainer}>
           <View style={styles.statusBoxBlue}>
             <Text style={styles.statusLabel}>Terakhir Dilayani</Text>
-            <Text style={styles.statusValue}>KT-008</Text>
+            <Text style={styles.statusValue}>{lastInProgressTicket}</Text>
           </View>
           <View style={styles.statusBoxOrange}>
             <Text style={styles.statusLabel}>Menunggu</Text>
-            <Text style={styles.statusValue}>2</Text>
+            <Text style={styles.statusValue}>{remainingInFront}</Text>
           </View>
         </View>
 
@@ -204,14 +191,20 @@ const TicketScreen = ({ navigation, route }) => {
           <Text style={styles.branchText}>Kantor Cabang {branchName}</Text>
           <Text style={styles.ticketLabel}>Nomor Antrian Anda</Text>
           <Text style={styles.ticketNumber}>
-            {loadingTicket ? 'Loading...' : (ticketDetail && ticketDetail.ticketNumber ? ticketDetail.ticketNumber : (ticketData && ticketData.ticketNumber ? ticketData.ticketNumber : ''))}
+            {loadingTicket
+              ? 'Loading...'
+              : ticketDetail?.ticketNumber || ticketData?.ticketNumber || '-'}
           </Text>
           <Text style={styles.dateText}>
-            Tanggal Ambil Antrean: {loadingTicket ? 'Loading...' : (ticketDetail && ticketDetail.bookingDate ? new Date(ticketDetail.bookingDate).toLocaleDateString() : (ticketData && ticketData.date ? ticketData.date : ''))}
+            Tanggal Ambil Antrean:{" "}
+            {loadingTicket
+              ? 'Loading...'
+              : ticketDetail?.bookingDate
+                ? new Date(ticketDetail.bookingDate).toLocaleDateString()
+                : ticketData?.date || '-'}
           </Text>
         </View>
-        
-        {/* Tombol Cetak Tiket sekarang membuka modal */}
+
         <TouchableOpacity style={styles.printButton} onPress={() => setIsModalVisible(true)}>
           <Text style={styles.printButtonText}>Cetak Tiket</Text>
         </TouchableOpacity>

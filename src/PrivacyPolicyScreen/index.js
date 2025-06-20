@@ -1,4 +1,3 @@
-// /screens/PrivacyPolicy/index.js
 import React from 'react';
 import {
   Text,
@@ -6,6 +5,9 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  ImageBackground,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import privacyStyles from './style';
@@ -17,13 +19,21 @@ export default function PrivacyPolicyScreen({ navigation }) {
 
   return (
     <SafeAreaView style={privacyStyles.container}>
-      {/* Header */}
-      <View style={privacyStyles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={privacyStyles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <Text style={privacyStyles.headerTitle}>Kebijakan Privasi</Text>
-      </View>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
+      {/* Header dengan background batik */}
+      <ImageBackground
+        source={require('../../assets/images/header.png')}
+        style={privacyStyles.headerImage}
+        resizeMode="cover"
+      >
+        <View style={privacyStyles.headerOverlay}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={privacyStyles.backButton}>
+            <Ionicons name="chevron-back-outline" size={24} color="#FFF" />
+          </TouchableOpacity>
+          <Text style={privacyStyles.headerTitle}>Kebijakan Privasi</Text>
+        </View>
+      </ImageBackground>
 
       {/* Content Card */}
       <View style={privacyStyles.card}>
@@ -50,11 +60,11 @@ export default function PrivacyPolicyScreen({ navigation }) {
           <Text style={privacyStyles.sectionTitle}>4. Hak Pengguna</Text>
           <Text style={privacyStyles.bulletPoint}>• Anda berhak mengakses, memperbarui, dan menghapus data pribadi Anda kapan saja</Text>
           <Text style={privacyStyles.bulletPoint}>• Permintaan dapat dilakukan melalui kontak resmi TemuCS</Text>
-        </ScrollView>
 
-        <TouchableOpacity style={privacyStyles.understandButton} onPress={handleUnderstand}>
-          <Text style={privacyStyles.understandButtonText}>Saya Mengerti</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={privacyStyles.understandButton} onPress={handleUnderstand}>
+            <Text style={privacyStyles.understandButtonText}>Saya Mengerti</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

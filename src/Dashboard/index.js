@@ -19,26 +19,14 @@ import { jwtDecode } from 'jwt-decode';
 
 const API_URL = 'https://temucs-tzaoj.ondigitalocean.app';
 
-const initialQueueData = [
-  { id: '1', noTiket: 'B-001', nama: 'Via Uni Rosa Sianipar', status: 'Online', waktu: '17:00 PM' },
-  { id: '2', noTiket: 'B-002', nama: 'Budi Santoso', status: 'Offline', waktu: '17:01 PM' },
-  { id: '3', noTiket: 'B-003', nama: 'Citra Lestari', status: 'Online', waktu: '17:02 PM' },
-  { id: '4', noTiket: 'B-004', nama: 'Dewi Anjani', status: 'Online', waktu: '17:03 PM' },
-  { id: '5', noTiket: 'B-005', nama: 'Eka Saputra', status: 'Offline', waktu: '17:04 PM' },
-  { id: '6', noTiket: 'B-006', nama: 'Farhan Alvianto', status: 'Online', waktu: '17:05 PM' },
-  { id: '7', noTiket: 'B-007', nama: 'Gita Prameswari', status: 'Offline', waktu: '17:06 PM' },
-  { id: '8', noTiket: 'B-008', nama: 'Herman Sihombing', status: 'Online', waktu: '17:07 PM' },
-  { id: '9', noTiket: 'B-009', nama: 'Indah Kusuma', status: 'Online', waktu: '17:08 PM' },
-  { id: '10', noTiket: 'B-010', nama: 'Joko Wibowo', status: 'Offline', waktu: '17:09 PM' },
-];
-
 export default function DashboardScreen({ navigation, onLogout }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [queueData, setQueueData] = useState(initialQueueData);
+  const [queueData, setQueueData] = useState([]);
   const [greeting, setGreeting] = useState('Memuat...');
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
   const [currentQueueNumber, setCurrentQueueNumber] = useState('Memuat...');
+  const [decodedToken, setDecodedToken] = useState(null);
 
   const formattedDate = format(new Date(), 'EEEE, d MMMM yyyy', { locale: id });
 
@@ -49,13 +37,13 @@ export default function DashboardScreen({ navigation, onLogout }) {
         if (!token) throw new Error('Token tidak ditemukan');
 
         const decoded = jwtDecode(token);
+        setDecodedToken(decoded);
+
         const branchId = decoded?.branchId;
         let branchName = decoded.name;
 
         const response = await fetch(`${API_URL}/api/branch/${branchId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.ok) {
@@ -79,66 +67,99 @@ export default function DashboardScreen({ navigation, onLogout }) {
     fetchGreetingFromToken();
   }, []);
 
-  useEffect(() => {
-    const fetchCurrentQueueNumber = async () => {
-      try {
-        const token = await AsyncStorage.getItem('userToken');
-        if (!token) throw new Error('Token tidak ditemukan');
+  const fetchCurrentQueueNumber = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) throw new Error('Token tidak ditemukan');
 
-        const response = await fetch(`${API_URL}/api/queue`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const response = await fetch(`${API_URL}/api/queue/inprogress/loket`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        if (!response.ok) throw new Error('Gagal mengambil data antrean');
-
-        const json = await response.json();
-        const data = json.data;
-
-        if (!Array.isArray(data)) throw new Error('Format data tidak sesuai');
-
-        const inProgressQueue = data.filter(item => {
-          const logs = item.queueLogs || [];
-          if (logs.length === 0) return false;
-          const latestLog = logs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-          return latestLog.status === 'in progress';
-        });
-
-        if (inProgressQueue.length > 0) {
-          const last = inProgressQueue.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-          setCurrentQueueNumber(last.ticketNumber || 'Tidak Diketahui');
-        } else if (data.length > 0) {
-          const lastQueue = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-          setCurrentQueueNumber(lastQueue.ticketNumber || '0');
-        } else {
-          setCurrentQueueNumber('0');
-        }
-      } catch (error) {
-        console.error('Gagal mengambil antrean saat ini:', error);
-        setCurrentQueueNumber('Gagal memuat');
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Response bukan JSON:', text);
+        throw new Error('Response dari server bukan JSON');
       }
-    };
 
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data?.message === 'Tidak ada antrian yang sedang dilayani.') {
+          setCurrentQueueNumber('0');
+          return;
+        }
+        console.log('Response Error:', data);
+        throw new Error('Gagal mengambil antrean saat ini');
+      }
+
+      if (data?.ticketNumber) {
+        setCurrentQueueNumber(data.ticketNumber);
+      } else {
+        setCurrentQueueNumber('Belum Ada');
+      }
+    } catch (error) {
+      console.error('Gagal mengambil antrean saat ini:', error);
+      setCurrentQueueNumber('Gagal memuat');
+    }
+  };
+
+  const fetchWaitingQueue = async () => {
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) throw new Error('Token tidak ditemukan');
+
+      const decoded = jwtDecode(token);
+      setDecodedToken(decoded);
+
+      const response = await fetch(`${API_URL}/api/queue/waiting/loket`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        console.error('Gagal ambil antrean waiting:', data);
+        return;
+      }
+
+      const formatted = data.map(item => ({
+        id: item.id.toString(),
+        noTiket: item.ticketNumber,
+        nama: item.name || '-',
+        status: item.userId ? 'Online' : 'Offline',
+        waktu: format(new Date(item.bookingDate), 'HH:mm', { locale: id })
+      }));
+
+      setQueueData(formatted);
+    } catch (error) {
+      console.error('Gagal mengambil antrean waiting:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch langsung pertama kali
     fetchCurrentQueueNumber();
+    fetchWaitingQueue();
+
+    // Interval refresh setiap 10 detik
+    const intervalId = setInterval(() => {
+      fetchCurrentQueueNumber();
+      fetchWaitingQueue();
+    }, 10000);
+
+    // Bersihkan interval saat unmount
+    return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    let filtered = initialQueueData;
-
-    if (searchQuery) {
-      filtered = filtered.filter(item =>
-        item.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.noTiket.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(item => item.status.toLowerCase() === filterStatus);
-    }
-
-    setQueueData(filtered);
-  }, [searchQuery, filterStatus]);
+  const filteredQueueData = queueData.filter(item => {
+    const matchesQuery =
+      item.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.noTiket.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      filterStatus === 'all' || item.status.toLowerCase() === filterStatus;
+    return matchesQuery && matchesStatus;
+  });
 
   const handleFilterChange = () => {
     if (filterStatus === 'all') setFilterStatus('online');
@@ -281,7 +302,7 @@ export default function DashboardScreen({ navigation, onLogout }) {
                 <Text style={[styles.tableHeaderText, { flex: 2, textAlign: 'right' }]}>Waktu Datang</Text>
               </View>
               <FlatList
-                data={queueData}
+                data={filteredQueueData}
                 renderItem={renderQueueItem}
                 keyExtractor={item => item.id}
                 scrollEnabled={false}

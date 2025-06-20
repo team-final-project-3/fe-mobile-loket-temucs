@@ -14,8 +14,7 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     backgroundColor: '#fff',
     overflow: 'hidden',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -81,11 +80,11 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   submitButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#28A745',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: '#10B981',
+    shadowColor: '#28A745',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
@@ -155,7 +154,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   confirmButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#28A745',
   },
   cancelButtonText: {
     color: '#374151',
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#10B981',
+    backgroundColor: '#E38E39',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -181,7 +180,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   successButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: '#28A745',
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',

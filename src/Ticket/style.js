@@ -14,9 +14,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     height: 60,
   },
-  backButton: {
-    marginRight: 16,
-  },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',

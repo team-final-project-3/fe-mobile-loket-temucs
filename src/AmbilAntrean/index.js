@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import base64 from 'base-64'; // <-- PERBAIKAN: Import base-64
+import base64 from 'base-64';
 import styles from './style';
 import { COLORS } from '../Constant/colors';
 
@@ -25,6 +25,8 @@ const AmbilAntreanScreen = ({ navigation }) => {
   const [branchName, setBranchName] = useState('');
   const [branchAddress, setBranchAddress] = useState('');
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [lastInProgressTicket, setLastInProgressTicket] = useState('Memuat...');
+  const [totalQueue, setTotalQueue] = useState('Memuat...');
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -36,7 +38,6 @@ const AmbilAntreanScreen = ({ navigation }) => {
           return;
         }
 
-        // <-- PERBAIKAN: Menggunakan base64.decode sebagai pengganti atob -->
         const decoded = JSON.parse(base64.decode(token.split('.')[1]));
         const loketId = decoded?.loketId;
 
@@ -46,10 +47,9 @@ const AmbilAntreanScreen = ({ navigation }) => {
           return;
         }
 
+        // Fetch info loket/cabang
         const response = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         const data = await response.json();
@@ -60,13 +60,38 @@ const AmbilAntreanScreen = ({ navigation }) => {
           return;
         }
 
-        const loketName = data?.loket?.name || 'Nama Cabang';
-        const address = data?.loket?.branch?.address || 'Alamat belum tersedia';
-        setBranchName(loketName);
-        setBranchAddress(address);
+        setBranchName(data?.loket?.name || 'Nama Cabang');
+        setBranchAddress(data?.loket?.branch?.address || 'Alamat belum tersedia');
+
+        // Fetch antrean in progress
+        const queueRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const queueData = await queueRes.json();
+
+        if (queueRes.ok && queueData && queueData.ticketNumber) {
+          setLastInProgressTicket(queueData.ticketNumber);
+        } else {
+          setLastInProgressTicket('-');
+        }
+
+        // Fetch total antrean
+        const countRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/count/loket`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const countData = await countRes.json();
+
+        if (countRes.ok && countData && typeof countData.totalQueue === 'number') {
+          setTotalQueue(countData.totalQueue);
+        } else {
+          setTotalQueue('-');
+        }
+
       } catch (error) {
-        console.error('Terjadi kesalahan saat fetch profile:', error);
-        Alert.alert('Error', 'Gagal memuat data cabang.');
+        console.error('Terjadi kesalahan saat fetch data:', error);
+        Alert.alert('Error', 'Gagal memuat data.');
       } finally {
         setLoadingProfile(false);
       }
@@ -96,9 +121,7 @@ const AmbilAntreanScreen = ({ navigation }) => {
       setContactError('');
     }
 
-    if (!isValid) {
-      return;
-    }
+    if (!isValid) return;
 
     navigation.navigate('LayananAntrean', {
       namaLengkap: trimmedName,
@@ -130,15 +153,20 @@ const AmbilAntreanScreen = ({ navigation }) => {
             <Text style={styles.branchName}>{branchName}</Text>
             <Text style={styles.branchAddress}>{branchAddress}</Text>
           </View>
+
           <View style={styles.queueStatsContainer}>
             <View style={[styles.statBox, styles.borderServed]}>
-              <Text style={styles.statLabel}>Terakhir Dilayani</Text>
-              <Text style={[styles.statValue, styles.valueServed]}>KT-008</Text>
+              <Text style={styles.statLabel}>Sedang Dilayani</Text>
+              <Text style={[styles.statValue, styles.valueServed]}>
+                {lastInProgressTicket}
+              </Text>
             </View>
 
             <View style={[styles.statBox, styles.borderTotal]}>
               <Text style={styles.statLabel}>Jumlah Antrian</Text>
-              <Text style={[styles.statValue, styles.valueTotal]}>10</Text>
+              <Text style={[styles.statValue, styles.valueTotal]}>
+                {totalQueue}
+              </Text>
             </View>
           </View>
 
