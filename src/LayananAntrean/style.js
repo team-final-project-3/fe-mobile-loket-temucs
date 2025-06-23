@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { COLORS } from '../Constant/colors';
 
 const styles = StyleSheet.create({
@@ -6,52 +6,63 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    // Menambahkan padding atas untuk Android agar tidak tertimpa status bar transparan
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
 
-  // --- HEADER NAVIGASI ---
-  navigationHeader: {
+  // --- HEADER BARU DENGAN IMAGEBACKGROUND ---
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    backgroundColor: COLORS.PRIMARY_ORANGE,
-    height: 60,
+    height: 65, // Sesuaikan tinggi header jika perlu
+    position: 'relative',
+    // backgroundColor dihapus
   },
 
   backButton: {
     position: 'absolute',
-    left: 15,
+    left: 10,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
     padding: 5,
   },
 
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.textLight,
+    color: 'white', // Warna teks dibuat putih agar kontras
   },
 
-  // --- INFORMASI CABANG ---
+  // --- INFORMASI CABANG (TIDAK DIUBAH) ---
   staticContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 20,
     backgroundColor: '#F0F2F5',
   },
+  
+  branchInfoCard:{
+    // jika butuh style khusus bisa ditambahkan di sini
+  },
 
   branchName: {
-    fontSize: 34,
+    fontSize: 28, // Sedikit disesuaikan agar rapi
     fontWeight: 'bold',
     color: '#053F5C',
+    textAlign: 'center',
   },
 
   branchAddress: {
     fontSize: 14,
     color: '#555',
     marginTop: 4,
-    height: 65,
+    textAlign: 'center',
+    minHeight: 35, // Beri tinggi minimum agar layout stabil
   },
 
-  // --- STATISTIK ANTREAN ---
+  // --- STATISTIK ANTREAN (TIDAK DIUBAH) ---
   queueStatsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -63,19 +74,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderRadius: 10,
+    borderWidth: 1,
+    borderRadius: 12,
     paddingVertical: 15,
-    marginHorizontal: 5,
+    marginHorizontal: 8,
     backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
   },
 
   borderServed: {
     borderColor: '#429EBD',
-  },
-
-  borderWaiting: {
-    borderColor: COLORS.PRIMARY_ORANGE,
   },
 
   borderTotal: {
@@ -85,10 +97,11 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     color: '#666',
+    fontWeight: '600'
   },
 
   statValue: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     marginTop: 5,
   },
@@ -97,25 +110,21 @@ const styles = StyleSheet.create({
     color: '#429EBD',
   },
 
-  valueWaiting: {
-    color: COLORS.PRIMARY_ORANGE,
-  },
-
   valueTotal: {
     color: '#666',
   },
 
-  // --- KONTEN SCROLLABLE ---
+  // --- KONTEN SCROLLABLE (TIDAK DIUBAH) ---
   scrollableContent: {
     flex: 1,
     backgroundColor: '#fff',
     paddingHorizontal: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    marginTop: -10,
+    marginTop: -20, // Efek tumpukan dipertahankan
   },
 
-  // --- FORM & PENCARIAN ---
+  // --- FORM & PENCARIAN (TIDAK DIUBAH) ---
   selectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -144,7 +153,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-  // --- LIST LAYANAN ---
+  // --- LIST LAYANAN (TIDAK DIUBAH) ---
   serviceList: {
     flex: 1,
   },
@@ -156,36 +165,34 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
   },
 
   checkbox: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
     borderRadius: 6,
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#E0E0E0',
-    backgroundColor: '#F9F9F9',
     marginRight: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   checkboxSelected: {
-    backgroundColor: '#fff',
     borderColor: COLORS.PRIMARY_ORANGE,
-    borderWidth: 7,
+    backgroundColor: '#FFF7F0'
   },
 
   serviceName: {
     fontSize: 16,
     color: '#333',
     fontWeight: '500',
+    flex: 1, // Agar teks tidak keluar batas
   },
 
-  // --- FOOTER & TOMBOL ---
+  // --- FOOTER & TOMBOL (TIDAK DIUBAH) ---
   footer: {
     padding: 20,
     paddingTop: 10,
@@ -199,8 +206,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 10,
     alignItems: 'center',
-    alignSelf: 'center',
-    width: '90%',
   },
 
   submitButtonText: {

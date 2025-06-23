@@ -3,99 +3,100 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F97316', // Warna latar belakang utama
   },
-  // BARU: Style untuk container ScrollView itu sendiri
-  scrollContainer: {
-    flex: 1,
-    width: '100%',
+  // [BARU] Overlay oranye untuk memberikan warna pada background batik
+  bgOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(249, 115, 22, 0.9)', // Warna oranye dengan opasitas 90%
   },
-  // BARU: Style untuk konten di dalam ScrollView
   scrollContentContainer: {
-    flexGrow: 1, // Penting! Memungkinkan konten tumbuh lebih tinggi dari layar
-    justifyContent: 'center', // Konten akan berada di tengah secara vertikal
-    alignItems: 'center', // Konten akan berada di tengah secara horizontal
-    paddingHorizontal: 20, // Padding kiri dan kanan
-    paddingVertical: 50, // Padding atas dan bawah untuk memberi ruang
-  },
-  card: {
-    width: '100%', // Card akan mengisi lebar container (dengan padding)
-    backgroundColor: 'white',
-    borderRadius: 20,
-    paddingHorizontal: 25,
-    paddingVertical: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    // Kita pindahkan justifyContent dan alignItems ke scrollContentContainer
-  },
-  logoContainer: {
-    backgroundColor: 'transparent',
-    width: 110,
-    height: 110,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'absolute',
-    top: -55,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+  },
+  // [PEMBARUAN] Logo diposisikan relatif terhadap layar, bukan card
+  logoContainer: {
+    width: 200, // Ukuran disesuaikan dengan logo baru Anda
+    height: 80,
+    marginBottom: 20,
+    alignSelf: 'center',
   },
   logo: {
-    width: '100%',
-    height: '100%',
+    width: '110%',
+    height: '110%',
     resizeMode: 'contain',
+  },
+  // [PEMBARUAN] Card dibuat lebih elegan
+  card: {
+    width: '100%',
+    backgroundColor: 'white',
+    borderRadius: 24, // Sudut lebih melengkung
+    padding: 30, // Padding lebih luas
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#1A202C',
-    marginTop: 60, // Ruang untuk logo
-    marginBottom: 20,
+    marginBottom: 25,
   },
-  inputContainer: {
+  inputGroup: {
     width: '100%',
-    marginBottom: 15,
+    marginBottom: 18,
   },
   label: {
     fontSize: 14,
     color: '#4A5568',
     marginBottom: 8,
     alignSelf: 'flex-start',
+    fontWeight: '500',
   },
-  input: {
-    width: '100%',
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  passwordWrapper: {
+  // [BARU] Wrapper untuk membungkus ikon dan input
+  inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
-    backgroundColor: 'white',
-    borderRadius: 8,
+    backgroundColor: '#F7FAFC',
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
-  passwordInput: {
+  inputIcon: {
+    fontSize: 22,
+    color: '#A0AEC0',
+    paddingLeft: 15,
+  },
+  input: {
     flex: 1,
-    padding: 15,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
     fontSize: 16,
+    color: '#2D3748',
   },
   eyeIcon: {
     paddingHorizontal: 15,
   },
+  // [PEMBARUAN] Gaya tombol login
   loginButton: {
+    flexDirection: 'row', // Untuk menampung ikon
+    justifyContent: 'center',
     width: '100%',
     backgroundColor: '#053F5C',
     paddingVertical: 15,
-    borderRadius: 8,
+    borderRadius: 12, // Sudut lebih melengkung
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 10,
+    shadowColor: '#053F5C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   loginButtonText: {
     color: 'white',
@@ -105,27 +106,27 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: 'center',
     color: 'white',
-    fontSize: 12,
+    fontSize: 13,
     paddingHorizontal: 20,
-    marginTop: 25,
-    // Dihapus marginBottom agar jarak lebih konsisten
+    marginTop: 30,
+    lineHeight: 20,
   },
   linkText: {
     fontWeight: 'bold',
     textDecorationLine: 'underline',
   },
   inputError: {
-    borderColor: 'red',
+    borderColor: '#E53E3E', // Warna merah yang lebih soft
   },
   errorText: {
-    color: 'red',
+    color: '#E53E3E',
     fontSize: 12,
-    marginTop: 5,
+    marginTop: 6,
     alignSelf: 'flex-start',
   },
   loadingOverlay: {
-    flex: 1,
-    backgroundColor: '#00000088',
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },

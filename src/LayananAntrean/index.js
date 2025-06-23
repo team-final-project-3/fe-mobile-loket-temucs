@@ -10,6 +10,7 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  ImageBackground, // <-- 1. Import ImageBackground
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +18,9 @@ import base64 from "base-64";
 
 import styles from "./style";
 import { COLORS } from "../Constant/colors";
+
+// <-- 2. Tentukan path ke gambar header Anda
+const headerBg = require('../../assets/images/header.png');
 
 const LayananAntreanScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,6 +32,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
   const [lastInProgressTicket, setLastInProgressTicket] = useState("Memuat...");
   const [totalQueue, setTotalQueue] = useState("Memuat...");
 
+  // ... (useEffect dan fungsi lainnya tetap sama)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -81,10 +86,14 @@ const LayananAntreanScreen = ({ navigation, route }) => {
           "https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        const lastTicketData = await lastTicketRes.json();
-        setLastInProgressTicket(
-          lastTicketRes.ok && lastTicketData?.ticketNumber ? lastTicketData.ticketNumber : "-"
-        );
+        if (lastTicketRes.status === 404) {
+             setLastInProgressTicket("-");
+        } else {
+            const lastTicketData = await lastTicketRes.json();
+            setLastInProgressTicket(
+                lastTicketRes.ok && lastTicketData?.ticketNumber ? lastTicketData.ticketNumber : "-"
+            );
+        }
 
         // Fetch Total Queue
         const countRes = await fetch(
@@ -143,7 +152,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         onPress={() => handleSelectService(item)}
       >
         <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-          {isSelected && <Ionicons name="checkmark" size={16} color="white" />}
+          {isSelected && <Ionicons name="checkmark" size={16} color={COLORS.PRIMARY_ORANGE} />}
         </View>
         <Text style={styles.serviceName}>{item.serviceName}</Text>
       </TouchableOpacity>
@@ -152,28 +161,30 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* 3. Buat StatusBar transparan agar gambar header menyatu */}
       <StatusBar
         barStyle="light-content"
-        backgroundColor={COLORS.PRIMARY_ORANGE}
+        backgroundColor="transparent"
+        translucent
       />
 
-      {/* Header */}
-      <View style={styles.navigationHeader}>
+      {/* 4. Ganti View header dengan ImageBackground */}
+      <ImageBackground source={headerBg} style={styles.header} resizeMode="cover">
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons
             name="chevron-back-outline"
-            size={24}
-            color={COLORS.background}
+            size={30}
+            color={'white'}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Ambil Antrean</Text>
-      </View>
+        <Text style={styles.headerTitle}>Pilih Layanan</Text>
+      </ImageBackground>
 
-      {/* Info Cabang */}
+      {/* Info Cabang (Konten tidak diubah) */}
       <View style={styles.staticContent}>
         <View style={styles.branchInfoCard}>
-          <Text style={styles.branchName}>{branchName}</Text>
-          <Text style={styles.branchAddress}>{branchAddress}</Text>
+           <Text style={styles.branchName}>{branchName}</Text>
+           <Text style={styles.branchAddress}>{branchAddress}</Text>
         </View>
 
         <View style={styles.queueStatsContainer}>
@@ -192,7 +203,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         </View>
       </View>
 
-      {/* Layanan */}
+      {/* Layanan (Konten tidak diubah) */}
       <View style={styles.scrollableContent}>
         <Text style={styles.selectionTitle}>Butuh Layanan apa?</Text>
 
@@ -222,7 +233,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         )}
       </View>
 
-      {/* Tombol Next */}
+      {/* Tombol Next (Konten tidak diubah) */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.submitButton} onPress={handleNext}>
           <Text style={styles.submitButtonText}>Selanjutnya</Text>

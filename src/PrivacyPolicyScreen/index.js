@@ -7,10 +7,51 @@ import {
   SafeAreaView,
   ImageBackground,
   StatusBar,
-  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import privacyStyles from './style';
+import * as Animatable from 'react-native-animatable'; // <-- [PENINGKATAN] Impor Animatable
+import styles from './style';
+
+const headerBg = require('../../assets/images/header.png');
+
+const privacyData = [
+    {
+        icon: 'document-text-outline',
+        title: '1. Data yang Kami Kumpulkan',
+        content: [
+            'Nama lengkap untuk identifikasi.',
+            'Nomor telepon dan/atau email untuk verifikasi dan komunikasi.',
+            'Informasi layanan dan kantor cabang yang Anda pilih.',
+        ],
+    },
+    {
+        icon: 'server-outline',
+        title: '2. Bagaimana Kami Menggunakan Data Anda',
+        content: [
+            'Memproses pendaftaran dan pemesanan nomor antrean Anda.',
+            'Mengirimkan notifikasi dan informasi terkait status antrean.',
+            'Menghubungi Anda untuk konfirmasi atau jika terjadi kendala layanan.',
+            'Menganalisis data secara anonim untuk peningkatan kualitas aplikasi.',
+        ],
+    },
+    {
+        icon: 'shield-checkmark-outline',
+        title: '3. Keamanan dan Penyimpanan Data',
+        content: [
+            'Semua data pribadi Anda disimpan dalam server yang aman dan dienkripsi.',
+            'Kami tidak akan pernah menjual atau membagikan data Anda kepada pihak ketiga untuk tujuan pemasaran tanpa persetujuan eksplisit Anda.',
+            'Akses ke data pribadi dibatasi hanya untuk personel yang berwenang.',
+        ],
+    },
+    {
+        icon: 'person-circle-outline',
+        title: '4. Hak Anda Sebagai Pengguna',
+        content: [
+            'Anda berhak untuk mengakses dan meninjau data pribadi yang kami simpan.',
+            'Anda dapat meminta koreksi atau penghapusan data Anda sesuai dengan ketentuan yang berlaku.',
+        ],
+    },
+];
 
 export default function PrivacyPolicyScreen({ navigation }) {
   const handleUnderstand = () => {
@@ -18,53 +59,45 @@ export default function PrivacyPolicyScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={privacyStyles.container}>
-      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      {/* Header dengan background batik */}
-      <ImageBackground
-        source={require('../../assets/images/header.png')}
-        style={privacyStyles.headerImage}
-        resizeMode="cover"
-      >
-        <View style={privacyStyles.headerOverlay}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={privacyStyles.backButton}>
-            <Ionicons name="chevron-back-outline" size={24} color="#FFF" />
-          </TouchableOpacity>
-          <Text style={privacyStyles.headerTitle}>Kebijakan Privasi</Text>
-        </View>
+      <ImageBackground source={headerBg} style={styles.header} resizeMode="cover">
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={28} color={'#FFF'} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Kebijakan Privasi</Text>
       </ImageBackground>
 
-      {/* Content Card */}
-      <View style={privacyStyles.card}>
-        <ScrollView contentContainerStyle={privacyStyles.scrollViewContent}>
-          <Text style={privacyStyles.cardTitle}>KEBIJAKAN PRIVASI TEMUCS</Text>
-
-          <Text style={privacyStyles.sectionTitle}>1. Data yang Dikumpulkan</Text>
-          <Text style={privacyStyles.paragraph}>Kami mengumpulkan informasi berikut dari pengguna:</Text>
-          <Text style={privacyStyles.bulletPoint}>• Nama lengkap</Text>
-          <Text style={privacyStyles.bulletPoint}>• Nomor telepon</Text>
-          <Text style={privacyStyles.bulletPoint}>• Lokasi kantor cabang yang dipilih</Text>
-
-          <Text style={privacyStyles.sectionTitle}>2. Penggunaan Data</Text>
-          <Text style={privacyStyles.paragraph}>Data pribadi Anda digunakan untuk:</Text>
-          <Text style={privacyStyles.bulletPoint}>• Verifikasi identitas</Text>
-          <Text style={privacyStyles.bulletPoint}>• Mengambil nomor antrean</Text>
-          <Text style={privacyStyles.bulletPoint}>• Menghubungi pengguna bila diperlukan</Text>
-
-          <Text style={privacyStyles.sectionTitle}>3. Penyimpanan & Keamanan Data</Text>
-          <Text style={privacyStyles.bulletPoint}>• Data disimpan secara terenkripsi</Text>
-          <Text style={privacyStyles.bulletPoint}>• Tidak dibagikan kepada pihak ketiga tanpa izin Anda</Text>
-          <Text style={privacyStyles.bulletPoint}>• Kami berkomitmen menjaga kerahasiaan data pengguna</Text>
-
-          <Text style={privacyStyles.sectionTitle}>4. Hak Pengguna</Text>
-          <Text style={privacyStyles.bulletPoint}>• Anda berhak mengakses, memperbarui, dan menghapus data pribadi Anda kapan saja</Text>
-          <Text style={privacyStyles.bulletPoint}>• Permintaan dapat dilakukan melalui kontak resmi TemuCS</Text>
-
-          <TouchableOpacity style={privacyStyles.understandButton} onPress={handleUnderstand}>
-            <Text style={privacyStyles.understandButtonText}>Saya Mengerti</Text>
-          </TouchableOpacity>
+      {/* [PENINGKATAN] Bungkus konten dengan Animatable.View untuk efek fade-in */}
+      <Animatable.View 
+        style={styles.contentBody}
+        animation="fadeInUp"
+        duration={800}
+        delay={200}
+      >
+        <ScrollView showsVerticalScrollIndicator={false}>
+            {privacyData.map((section, index) => (
+              <View key={index} style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name={section.icon} size={22} color="#053F5C" />
+                  <Text style={styles.sectionTitle}>{section.title}</Text>
+                </View>
+                {section.content.map((point, pointIndex) => (
+                  <View key={pointIndex} style={styles.bulletPointContainer}>
+                    <View style={styles.bullet} />
+                    <Text style={styles.bulletPointText}>{point}</Text>
+                  </View>
+                ))}
+              </View>
+            ))}
         </ScrollView>
+      </Animatable.View>
+
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.understandButton} onPress={handleUnderstand}>
+          <Text style={styles.understandButtonText}>Saya Mengerti</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

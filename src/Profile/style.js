@@ -1,82 +1,91 @@
-import { StyleSheet } from 'react-native';
-import { COLORS } from '../Constant/colors'; // <- gunakan yang diekspor
+import { StyleSheet, Platform } from 'react-native';
+import { COLORS } from '../Constant/colors';
 
 const styles = StyleSheet.create({
+  // --- STRUKTUR DASAR ---
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#053F5C', // Warna dasar disamakan dengan header
   },
-  // Style BARU untuk header navigasi
-  navigationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  // --- HEADER TERPADU ---
+  header: {
+    height: 280, // Header tinggi untuk informasi profil
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    backgroundColor: COLORS.PRIMARY_ORANGE, // Warna oranye tetap menjadi dasar
-    position: 'relative',
-    height: 60,
-    overflow: 'hidden', // Penting untuk memastikan pola tidak keluar dari header
-  },
-  // Style BARU untuk gambar pola di header
-  headerPatternImage: {
-    opacity: 0.1, // Membuat pola terlihat subtle (samar)
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'android' ? 40 : 20, // Padding untuk status bar
+    backgroundColor: 'rgba(0,0,0,0.3)', // Overlay gelap agar teks kontras
   },
   backButton: {
     position: 'absolute',
-    left: 15,
+    top: Platform.OS === 'android' ? 50 : 60,
+    left: 20,
     padding: 5,
-    zIndex: 1, // Memastikan tombol tetap di atas pola
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.textLight,
-  },
-  // Card biru di bagian atas
-  headerCard: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 20,
-    paddingBottom: 40,
+  profileInfoContainer: {
     alignItems: 'center',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    elevation: 5,
-    zIndex: 1,
+    justifyContent: 'center',
   },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: COLORS.background,
+  profileAvatarWrapper: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
+    borderWidth: 3,
+    borderColor: '#fff',
+    elevation: 10,
   },
-  branchName: {
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  profileRole: {
+    fontSize: 16,
+    color: '#E0E0E0',
+    marginTop: 4,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  // --- KONTEN UTAMA ---
+  contentBody: {
+    flex: 1,
+    backgroundColor: '#F4F6F8', // Latar belakang konten yang cerah
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -30, // Efek "sheet" yang menumpuk di bawah header
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.textLight,
+    color: '#374151',
+    paddingHorizontal: 25,
+    marginTop: 25,
+    marginBottom: 15,
   },
-  // Container putih untuk semua informasi
-  infoContainer: {
-    backgroundColor: COLORS.background,
-    borderRadius: 10,
-    paddingHorizontal: 20,
+  infoSection: {
+    marginBottom: 10,
+  },
+  infoCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginHorizontal: 20,
     paddingVertical: 10,
-    elevation: 4,
-    marginTop: -20,
-    marginHorizontal: 15, // Menambahkan margin agar kartu tidak menempel di tepi layar
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.05,
     shadowRadius: 4,
   },
-  // Setiap baris informasi
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 20,
+    paddingHorizontal: 20,
   },
   infoIcon: {
     marginRight: 20,
@@ -85,20 +94,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: COLORS.TEXT_GRAY,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 5,
     textTransform: 'uppercase',
   },
   infoValue: {
     fontSize: 16,
-    color: COLORS.BLACK,
+    color: '#1F2937',
+    lineHeight: 22,
   },
-  // Garis pemisah
   separator: {
     height: 1,
-    backgroundColor: COLORS.SEPARATOR,
+    backgroundColor: '#F0F2F5',
+    marginHorizontal: 20,
   },
 });
 

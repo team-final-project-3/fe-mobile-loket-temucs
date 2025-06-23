@@ -1,12 +1,13 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F8',
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
   container: {
-    flex: 1, // Added to ensure ScrollView fills the safe area and prevents overlap with status bar
+    flex: 1,
   },
   contentWrapper: {
     paddingHorizontal: 16,
@@ -15,44 +16,51 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#F27F0C',
+    height: 75,
+    marginTop: Platform.OS === 'android' ? -RNStatusBar.currentHeight : 0,
   },
   profileIcon: {
-    padding: 5,
+    padding: 3,
+    top: 10,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 9,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 20,
+    top: 10,
   },
   logoutButtonText: {
     color: '#FFFFFF',
-    marginLeft: 3,
+    marginLeft: 5,
     fontWeight: 'bold',
     fontSize: 12,
   },
   welcomeText: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: 'black',
-    marginTop: 10,
+    color: '#1F2937',
+    marginTop: 20,
   },
   dateText: {
-    fontSize: 14,
-    color: 'gray',
+    fontSize: 15,
+    color: '#6B7280',
     marginBottom: 20,
   },
   currentQueueCard: {
     backgroundColor: '#053F5C',
-    borderRadius: 15,
+    borderRadius: 16,
     padding: 20,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
+    shadowColor: '#053F5C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   currentQueueTitle: {
     fontSize: 16,
@@ -65,14 +73,42 @@ const styles = StyleSheet.create({
     color: 'white',
     marginVertical: 10,
   },
+  refreshButton: {
+    flexDirection: 'row',
+    backgroundColor: '#DC3545',
+    borderRadius: 12,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 15,
+    shadowColor: '#DC3545',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  refreshButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  buttonDisabled: {
+    backgroundColor: '#E0A1A7',
+  },
   actionButton: {
     flexDirection: 'row',
     backgroundColor: '#28A745',
-    borderRadius: 10,
-    padding: 15,
+    borderRadius: 12,
+    padding: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 25,
+    shadowColor: '#28A745',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
   },
   actionButtonText: {
     color: 'white',
@@ -80,8 +116,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
   },
-
-  // ++ MODAL LOGOUT STYLES ++
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -94,10 +128,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -160,106 +191,138 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-
-  // ++ DAFTAR ANTRIAN STYLES (MENYATU) ++
   listTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10, // Memberi jarak ke kartu di bawahnya
+    color: '#1F2937',
+    marginBottom: 15,
   },
   listWrapper: {
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 40,
-    // Efek shadow untuk keseluruhan kartu
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#959DA5',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 5,
+    overflow: 'hidden',
   },
   searchFilterSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#F27F0C',
-    // Hanya sudut atas
-    borderTopRightRadius: 12,
-    },
-    searchContainer: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#FFFFFF',
-      borderRadius: 8,
-      marginRight: 6, // lebih kecil
-      height: 36, // tambah tinggi tetap
-    },
-    searchIcon: {
-      paddingLeft: 8, // lebih kecil
-    },
-    searchInput: {
-      flex: 1,
-      paddingVertical: 6, // lebih kecil
-      paddingHorizontal: 6, // lebih kecil
-      fontSize: 13, // lebih kecil
-      color: '#333',
-    },
-    filterButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#FFFFFF',
-      paddingHorizontal: 10, // lebih kecil
-      paddingVertical: 6, // lebih kecil
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: 'transparent',
-    },
-    filterButtonOnline: {
-      borderColor: '#28A745', // Warna border saat online
+    padding: 12,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 10,
+    marginRight: 10,
+    height: 44,
+  },
+  searchIcon: {
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingRight: 10,
+    fontSize: 14,
+    color: '#1F2937',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    height: 44,
+    borderRadius: 10,
+  },
+  filterButtonOnline: {
+    backgroundColor: '#E0F2F1',
   },
   filterButtonOffline: {
-    borderColor: '#DC3545', // Warna border saat offline
+    backgroundColor: '#FCE4EC',
   },
   filterButtonText: {
-    color: '#333',
-    fontWeight: 'bold',
+    color: '#374151',
+    fontWeight: '600',
     marginLeft: 8,
     fontSize: 14,
   },
-  filterButtonTextActive: {
-    // Optional: jika ingin teks juga berubah warna
-  },
+  filterButtonTextActive: {},
   tableContainer: {
     backgroundColor: 'white',
-    padding: 15,
-    borderBottomLeftRadius: 12, // Hanya sudut bawah
-    borderBottomRightRadius: 12,
+    paddingHorizontal: 15,
   },
   tableHeader: {
     flexDirection: 'row',
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
+    paddingBottom: 10,
+    paddingTop: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: '#F3F4F6',
   },
   tableHeaderText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#666',
+    color: '#6B7280',
     textTransform: 'uppercase',
   },
   tableRow: {
     flexDirection: 'row',
-    paddingVertical: 12,
+    alignItems: 'center',
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#F5F5F5',
+    borderBottomColor: '#F3F4F6',
   },
   tableCell: {
     fontSize: 14,
-    color: '#333',
+    color: '#374151',
+  },
+  ticketCell: {
+    fontWeight: 'bold',
+    color: '#053F5C',
+  },
+  nameCell: {
+    fontWeight: '500',
+  },
+  timeCell: {
+    color: '#6B7280',
+  },
+  statusCellContainer: {
+    alignItems: 'flex-start',
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  statusBadgeOnline: {
+    backgroundColor: '#D1FAE5',
+  },
+  statusBadgeOffline: {
+    backgroundColor: '#FEE2E2',
+  },
+  statusTextOnline: {
+    color: '#065F46',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  statusTextOffline: {
+    color: '#991B1B',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  emptyListText: {
+    textAlign: 'center',
+    paddingVertical: 40,
+    color: '#6B7280',
+    fontSize: 14,
   },
 });
 

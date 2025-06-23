@@ -6,12 +6,14 @@ import {
   ScrollView,
   SafeAreaView,
   ImageBackground,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-// [PERUBAHAN] Mengimpor style dari file terpisah
-import styles from './style';
+import styles from './style'; // Menggunakan style yang sudah didesain ulang
 
-// --- KOMPONEN LAYAR ---
+// Path ke gambar header
+const headerBg = require('../../assets/images/header.png');
+
 export default function TermsAndConditionsScreen({ navigation }) {
   const handleAgree = () => {
     navigation.goBack(); // Kembali ke layar sebelumnya
@@ -19,65 +21,63 @@ export default function TermsAndConditionsScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header dengan gambar */}
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      
+      {/* Header Profesional yang Konsisten */}
       <ImageBackground
-        // Pastikan path ke aset gambar sudah benar
-        source={require('../../assets/images/header.png')}
-        style={styles.headerImage}
+        source={headerBg}
+        style={styles.header}
         resizeMode="cover"
       >
-        <View style={styles.headerOverlay}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="chevron-back-outline" size={24} color={'white'} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Syarat & Ketentuan</Text>
-        </View>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={28} color={'white'} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Syarat & Ketentuan</Text>
       </ImageBackground>
 
-      {/* Konten Kartu */}
-      <View style={styles.card}>
+      {/* Konten Utama dengan Layout "Sheet" */}
+      <View style={styles.contentBody}>
         <ScrollView 
             contentContainerStyle={styles.scrollViewContent} 
             showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.cardTitle}>SYARAT DAN KETENTUAN PENGGUNAAN TEMUCS</Text>
+          <Text style={styles.pageTitle}>Ketentuan Penggunaan Aplikasi TemuCS</Text>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>1. Pengantar</Text>
             <Text style={styles.paragraph}>
-              Aplikasi ini disediakan oleh TemuCS untuk memudahkan pengguna melakukan pemesanan layanan secara praktis tanpa harus menunggu lama di tempat layanan.
+              Selamat datang di TemuCS. Dengan menggunakan aplikasi ini, Anda setuju untuk terikat oleh syarat dan ketentuan yang ditetapkan. Aplikasi ini bertujuan untuk memudahkan Anda dalam memesan layanan secara online untuk menghindari antrean panjang.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>2. Penggunaan Aplikasi</Text>
+            <Text style={styles.sectionTitle}>2. Kewajiban Pengguna</Text>
             <Text style={styles.paragraph}>
-              Pengguna wajib memasukkan data dengan benar, tidak menyalahgunakan sistem, serta bertanggung jawab atas data yang diberikan.
+              Anda bertanggung jawab untuk memberikan informasi yang akurat dan benar saat melakukan pendaftaran dan pemesanan. Dilarang keras menyalahgunakan aplikasi untuk tujuan yang melanggar hukum atau merugikan pihak lain.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>3. Hak dan Kewajiban</Text>
-            <Text style={styles.bulletPoint}>• Pengguna bertanggung jawab penuh atas akun yang dimiliki.</Text>
-            <Text style={styles.bulletPoint}>• TemuCS berhak menghentikan akses pengguna jika terjadi pelanggaran terhadap ketentuan yang berlaku.</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>4. Pengumpulan Data</Text>
+            <Text style={styles.sectionTitle}>3. Privasi dan Data</Text>
             <Text style={styles.paragraph}>
-              Kami mengumpulkan data seperti nama dan nomor telepon untuk keperluan verifikasi, layanan pelanggan, dan peningkatan kualitas layanan.
+              Kami berkomitmen untuk melindungi privasi Anda. Data pribadi seperti nama, email, dan nomor telepon yang kami kumpulkan hanya akan digunakan untuk keperluan verifikasi, komunikasi terkait layanan, dan peningkatan kualitas aplikasi. Kami tidak akan membagikan data Anda kepada pihak ketiga tanpa persetujuan Anda, kecuali diwajibkan oleh hukum.
             </Text>
           </View>
+          
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>4. Pembatasan Tanggung Jawab</Text>
+            <Text style={styles.paragraph}>
+              TemuCS tidak bertanggung jawab atas kerugian tidak langsung yang mungkin timbul dari penggunaan atau ketidakmampuan untuk menggunakan aplikasi. Layanan disediakan "sebagaimana adanya" tanpa jaminan apa pun.
+            </Text>
+          </View>
+
         </ScrollView>
       </View>
 
-      {/* Spacer View untuk mendorong kartu ke atas */}
-      <View style={{ flex: 1 }} />
-
-      {/* Tombol "Saya Setuju" yang mengambang di kanan bawah */}
-      <View style={styles.agreeButtonContainer}>
+      {/* Footer untuk Tombol Aksi */}
+      <View style={styles.footer}>
         <TouchableOpacity style={styles.agreeButton} onPress={handleAgree}>
-          <Text style={styles.agreeButtonText}>Saya Setuju</Text>
+          <Text style={styles.agreeButtonText}>Saya Mengerti dan Setuju</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

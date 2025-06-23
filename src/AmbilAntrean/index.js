@@ -8,13 +8,17 @@ import {
   TextInput,
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import base64 from 'base-64';
 import styles from './style';
 import { COLORS } from '../Constant/colors';
+
+// Gambar header
+const headerBg = require('../../assets/images/header.png');
 
 const AmbilAntreanScreen = ({ navigation }) => {
   const [namaLengkap, setNamaLengkap] = useState('');
@@ -47,48 +51,31 @@ const AmbilAntreanScreen = ({ navigation }) => {
           return;
         }
 
-        // Fetch info loket/cabang
-        const response = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const headers = { Authorization: `Bearer ${token}` };
 
-        const data = await response.json();
+        const profileRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`, { headers });
+        const profileData = await profileRes.json();
 
-        if (!response.ok) {
-          console.error('Gagal mengambil data profil:', data?.message || data);
+        if (!profileRes.ok) {
+          console.error('Gagal mengambil data profil:', profileData?.message || profileData);
           setLoadingProfile(false);
           return;
         }
 
-        setBranchName(data?.loket?.name || 'Nama Cabang');
-        setBranchAddress(data?.loket?.branch?.address || 'Alamat belum tersedia');
+        setBranchName(profileData?.loket?.name || 'Nama Cabang');
+        setBranchAddress(profileData?.loket?.branch?.address || 'Alamat belum tersedia');
 
-        // Fetch antrean in progress
-        const queueRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const queueData = await queueRes.json();
-
-        if (queueRes.ok && queueData && queueData.ticketNumber) {
-          setLastInProgressTicket(queueData.ticketNumber);
-        } else {
+        const inProgressRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket`, { headers });
+        if (inProgressRes.status === 404) {
           setLastInProgressTicket('-');
-        }
-
-        // Fetch total antrean
-        const countRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/count/loket`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const countData = await countRes.json();
-
-        if (countRes.ok && countData && typeof countData.totalQueue === 'number') {
-          setTotalQueue(countData.totalQueue);
         } else {
-          setTotalQueue('-');
+          const inProgressData = await inProgressRes.json();
+          setLastInProgressTicket(inProgressData?.ticketNumber || '-');
         }
 
+        const countRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/count/loket`, { headers });
+        const countData = await countRes.json();
+        setTotalQueue(countData?.totalQueue ?? '-');
       } catch (error) {
         console.error('Terjadi kesalahan saat fetch data:', error);
         Alert.alert('Error', 'Gagal memuat data.');
@@ -140,36 +127,36 @@ const AmbilAntreanScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.PRIMARY_ORANGE} />
-      <View style={styles.navigationHeader}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+
+      <ImageBackground source={headerBg} style={styles.header} resizeMode="cover">
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="chevron-back-outline" size={24} color={'white'} />
+          <Ionicons name="chevron-back-outline" size={30} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Ambil Antrean</Text>
-      </View>
+      </ImageBackground>
+
       <ScrollView>
         <View style={styles.contentWrapper}>
+          {/* Info Cabang */}
           <View style={styles.branchInfoCard}>
             <Text style={styles.branchName}>{branchName}</Text>
             <Text style={styles.branchAddress}>{branchAddress}</Text>
           </View>
 
+          {/* Statistik Antrian */}
           <View style={styles.queueStatsContainer}>
             <View style={[styles.statBox, styles.borderServed]}>
               <Text style={styles.statLabel}>Sedang Dilayani</Text>
-              <Text style={[styles.statValue, styles.valueServed]}>
-                {lastInProgressTicket}
-              </Text>
+              <Text style={[styles.statValue, styles.valueServed]}>{lastInProgressTicket}</Text>
             </View>
-
             <View style={[styles.statBox, styles.borderTotal]}>
               <Text style={styles.statLabel}>Jumlah Antrian</Text>
-              <Text style={[styles.statValue, styles.valueTotal]}>
-                {totalQueue}
-              </Text>
+              <Text style={[styles.statValue, styles.valueTotal]}>{totalQueue}</Text>
             </View>
           </View>
 
+          {/* Form Data Nasabah */}
           <View style={styles.formContainer}>
             <Text style={styles.formTitle}>DATA NASABAH</Text>
 
@@ -196,7 +183,7 @@ const AmbilAntreanScreen = ({ navigation }) => {
                   setEmail(text);
                   if (contactError) setContactError('');
                 }}
-                placeholder={contactError || "Masukkan email Anda"}
+                placeholder={contactError || 'Masukkan email Anda'}
                 placeholderTextColor={contactError ? 'red' : '#999'}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -218,15 +205,16 @@ const AmbilAntreanScreen = ({ navigation }) => {
                   setNoTelepon(text);
                   if (contactError) setContactError('');
                 }}
-                placeholder={contactError || "Masukkan nomor telepon Anda"}
+                placeholder={contactError || 'Masukkan nomor telepon Anda'}
                 placeholderTextColor={contactError ? 'red' : '#999'}
                 keyboardType="phone-pad"
               />
             </View>
           </View>
 
+          {/* Tombol Lanjut */}
           <TouchableOpacity style={styles.submitButton} onPress={handleAmbilAntrean}>
-            <Text style={styles.submitButtonText}>Ambil Antrean</Text>
+            <Text style={styles.submitButtonText}>Lanjutkan</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
