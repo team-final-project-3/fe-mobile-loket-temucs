@@ -80,7 +80,6 @@ const ProfileScreen = ({ navigation }) => {
             <Ionicons name="business" size={50} color="#053F5C" />
           </View>
           <Text style={styles.profileName}>{username}</Text>
-          <Text style={styles.profileRole}>Petugas Loket</Text>
         </View>
       </ImageBackground>
 

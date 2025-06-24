@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   Alert,
   ImageBackground,
+  KeyboardAvoidingView, // Impor untuk keyboard
+  Platform,           // Impor untuk mendeteksi OS (iOS/Android)
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -102,7 +104,7 @@ const AmbilAntreanScreen = ({ navigation }) => {
     }
 
     if (!trimmedEmail && !trimmedNoTelepon) {
-      setContactError('Wajib isi salah satu: Email atau No Telepon.');
+      setContactError('Email atau No Telepon wajib diisi');
       isValid = false;
     } else {
       setContactError('');
@@ -136,88 +138,97 @@ const AmbilAntreanScreen = ({ navigation }) => {
         <Text style={styles.headerTitle}>Ambil Antrean</Text>
       </ImageBackground>
 
-      <ScrollView>
-        <View style={styles.contentWrapper}>
-          {/* Info Cabang */}
-          <View style={styles.branchInfoCard}>
-            <Text style={styles.branchName}>{branchName}</Text>
-            <Text style={styles.branchAddress}>{branchAddress}</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          <View style={styles.contentWrapper}>
+            {/* Info Cabang */}
+            <View style={styles.branchInfoCard}>
+              <Text style={styles.branchName}>{branchName}</Text>
+              <Text style={styles.branchAddress}>{branchAddress}</Text>
+            </View>
+
+            {/* Statistik Antrian */}
+            <View style={styles.queueStatsContainer}>
+              <View style={[styles.statBox, styles.borderServed]}>
+                <Text style={styles.statLabel}>Sedang Dilayani</Text>
+                <Text style={[styles.statValue, styles.valueServed]}>{lastInProgressTicket}</Text>
+              </View>
+              <View style={[styles.statBox, styles.borderTotal]}>
+                <Text style={styles.statLabel}>Jumlah Antrian</Text>
+                <Text style={[styles.statValue, styles.valueTotal]}>{totalQueue}</Text>
+              </View>
+            </View>
+
+            {/* Form Data Nasabah */}
+            <View style={styles.formContainer}>
+              <Text style={styles.formTitle}>DATA NASABAH</Text>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Nama Lengkap *</Text>
+                <TextInput
+                  style={[styles.input, namaError ? styles.inputError : null]}
+                  value={namaLengkap}
+                  onChangeText={(text) => {
+                    setNamaLengkap(text);
+                    if (namaError) setNamaError('');
+                  }}
+                  placeholder={namaError || 'Masukkan nama lengkap Anda'}
+                  placeholderTextColor={namaError ? 'red' : '#999'}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Email</Text>
+                <TextInput
+                  style={[styles.input, contactError ? styles.inputError : null]}
+                  value={email}
+                  onChangeText={(text) => {
+                    setEmail(text);
+                    if (contactError) setContactError('');
+                  }}
+                  placeholder={contactError || 'Masukkan email Anda'}
+                  placeholderTextColor={contactError ? 'red' : '#999'}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>Atau</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>No Telepon</Text>
+                <TextInput
+                  style={[styles.input, contactError ? styles.inputError : null]}
+                  value={noTelepon}
+                  onChangeText={(text) => {
+                    setNoTelepon(text);
+                    if (contactError) setContactError('');
+                  }}
+                  // INI ADALAH BAGIAN YANG SUDAH DIPERBAIKI
+                  placeholder={contactError || 'Masukkan nomor telepon Anda'}
+                  placeholderTextColor={contactError ? 'red' : '#999'}
+                  keyboardType="phone-pad"
+                />
+              </View>
+            </View>
+
+            {/* Tombol Lanjut */}
+            <TouchableOpacity style={styles.submitButton} onPress={handleAmbilAntrean}>
+              <Text style={styles.submitButtonText}>Lanjutkan</Text>
+            </TouchableOpacity>
           </View>
-
-          {/* Statistik Antrian */}
-          <View style={styles.queueStatsContainer}>
-            <View style={[styles.statBox, styles.borderServed]}>
-              <Text style={styles.statLabel}>Sedang Dilayani</Text>
-              <Text style={[styles.statValue, styles.valueServed]}>{lastInProgressTicket}</Text>
-            </View>
-            <View style={[styles.statBox, styles.borderTotal]}>
-              <Text style={styles.statLabel}>Jumlah Antrian</Text>
-              <Text style={[styles.statValue, styles.valueTotal]}>{totalQueue}</Text>
-            </View>
-          </View>
-
-          {/* Form Data Nasabah */}
-          <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>DATA NASABAH</Text>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Nama Lengkap *</Text>
-              <TextInput
-                style={[styles.input, namaError ? styles.inputError : null]}
-                value={namaLengkap}
-                onChangeText={(text) => {
-                  setNamaLengkap(text);
-                  if (namaError) setNamaError('');
-                }}
-                placeholder={namaError || 'Masukkan nama lengkap Anda'}
-                placeholderTextColor={namaError ? 'red' : '#999'}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={[styles.input, contactError ? styles.inputError : null]}
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  if (contactError) setContactError('');
-                }}
-                placeholder={contactError || 'Masukkan email Anda'}
-                placeholderTextColor={contactError ? 'red' : '#999'}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-
-            <View style={styles.dividerContainer}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Atau</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>No Telepon</Text>
-              <TextInput
-                style={[styles.input, contactError ? styles.inputError : null]}
-                value={noTelepon}
-                onChangeText={(text) => {
-                  setNoTelepon(text);
-                  if (contactError) setContactError('');
-                }}
-                placeholder={contactError || 'Masukkan nomor telepon Anda'}
-                placeholderTextColor={contactError ? 'red' : '#999'}
-                keyboardType="phone-pad"
-              />
-            </View>
-          </View>
-
-          {/* Tombol Lanjut */}
-          <TouchableOpacity style={styles.submitButton} onPress={handleAmbilAntrean}>
-            <Text style={styles.submitButtonText}>Lanjutkan</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

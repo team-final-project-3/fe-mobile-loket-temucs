@@ -236,7 +236,7 @@ export default function DashboardScreen({ navigation, onLogout }) {
           </View>
 
           <TouchableOpacity style={[styles.refreshButton, isRefreshing && styles.buttonDisabled]} onPress={handleRefreshPress} disabled={isRefreshing}>
-            {isRefreshing ? <ActivityIndicator size="small" color="white" /> : <><Ionicons name="refresh" size={15} color="white" /><Text style={styles.refreshButtonText}>Update Antrean</Text></>}
+            {isRefreshing ? <ActivityIndicator size="small" color="white" /> : <><Ionicons name="refresh" size={24} color="white" /><Text style={styles.refreshButtonText}>Update Antrean</Text></>}
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('AmbilAntrean')}>

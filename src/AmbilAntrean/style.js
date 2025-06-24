@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#E0E0E0',
     },
     dividerText: {
-        color: '#888',
+        color: '#FFFFFF',
         marginHorizontal: 10,
         fontSize: 12,
         fontWeight: '600',

@@ -42,15 +42,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  profileRole: {
-    fontSize: 16,
-    color: '#E0E0E0',
-    marginTop: 4,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
   // --- KONTEN UTAMA ---
   contentBody: {
     flex: 1,

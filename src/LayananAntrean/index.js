@@ -1,4 +1,3 @@
-// ...import statements
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -10,7 +9,9 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
-  ImageBackground, // <-- 1. Import ImageBackground
+  ImageBackground,
+  KeyboardAvoidingView, // <-- 1. Impor KeyboardAvoidingView
+  Platform,           // <-- 1. Impor Platform
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,7 +20,6 @@ import base64 from "base-64";
 import styles from "./style";
 import { COLORS } from "../Constant/colors";
 
-// <-- 2. Tentukan path ke gambar header Anda
 const headerBg = require('../../assets/images/header.png');
 
 const LayananAntreanScreen = ({ navigation, route }) => {
@@ -32,7 +32,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
   const [lastInProgressTicket, setLastInProgressTicket] = useState("Memuat...");
   const [totalQueue, setTotalQueue] = useState("Memuat...");
 
-  // ... (useEffect dan fungsi lainnya tetap sama)
+  // ... useEffect tetap sama ...
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -51,11 +51,13 @@ const LayananAntreanScreen = ({ navigation, route }) => {
           setLoading(false);
           return;
         }
+        
+        const headers = { Authorization: `Bearer ${token}` };
 
         // Fetch Profile
         const profileResponse = await fetch(
           `https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers }
         );
 
         if (!profileResponse.ok) {
@@ -70,7 +72,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         // Fetch Services
         const servicesResponse = await fetch(
           "https://temucs-tzaoj.ondigitalocean.app/api/service/loket",
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers }
         );
 
         if (!servicesResponse.ok) {
@@ -84,10 +86,10 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         // Fetch Last Ticket In Progress
         const lastTicketRes = await fetch(
           "https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket",
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers }
         );
         if (lastTicketRes.status === 404) {
-             setLastInProgressTicket("-");
+            setLastInProgressTicket("-");
         } else {
             const lastTicketData = await lastTicketRes.json();
             setLastInProgressTicket(
@@ -98,7 +100,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         // Fetch Total Queue
         const countRes = await fetch(
           "https://temucs-tzaoj.ondigitalocean.app/api/queue/count/loket",
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers }
         );
         const countData = await countRes.json();
         setTotalQueue(
@@ -113,6 +115,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
     fetchData();
   }, []);
+
 
   const filteredServices = services
     .filter((service) => service.status === true)
@@ -159,16 +162,56 @@ const LayananAntreanScreen = ({ navigation, route }) => {
     );
   };
 
+  // <-- 2. Buat komponen untuk header dari FlatList
+  const renderListHeader = () => (
+    <>
+      {/* Info Cabang */}
+      <View style={styles.branchInfoCard}>
+        <Text style={styles.branchName}>{branchName}</Text>
+        <Text style={styles.branchAddress}>{branchAddress}</Text>
+      </View>
+
+      {/* Statistik Antrian */}
+      <View style={styles.queueStatsContainer}>
+        <View style={[styles.statBox, styles.borderServed]}>
+          <Text style={styles.statLabel}>Sedang Dilayani</Text>
+          <Text style={[styles.statValue, styles.valueServed]}>
+            {lastInProgressTicket}
+          </Text>
+        </View>
+        <View style={[styles.statBox, styles.borderTotal]}>
+          <Text style={styles.statLabel}>Jumlah Antrian</Text>
+          <Text style={[styles.statValue, styles.valueTotal]}>
+            {totalQueue}
+          </Text>
+        </View>
+      </View>
+      
+      {/* Search Bar */}
+      <View style={{paddingHorizontal: 20}}>
+        <Text style={styles.selectionTitle}>Butuh Layanan apa?</Text>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cari jenis layanan"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+        </View>
+      </View>
+    </>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* 3. Buat StatusBar transparan agar gambar header menyatu */}
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
         translucent
       />
 
-      {/* 4. Ganti View header dengan ImageBackground */}
+      {/* Header dengan ImageBackground */}
       <ImageBackground source={headerBg} style={styles.header} resizeMode="cover">
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons
@@ -180,65 +223,36 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         <Text style={styles.headerTitle}>Pilih Layanan</Text>
       </ImageBackground>
 
-      {/* Info Cabang (Konten tidak diubah) */}
-      <View style={styles.staticContent}>
-        <View style={styles.branchInfoCard}>
-           <Text style={styles.branchName}>{branchName}</Text>
-           <Text style={styles.branchAddress}>{branchAddress}</Text>
-        </View>
-
-        <View style={styles.queueStatsContainer}>
-          <View style={[styles.statBox, styles.borderServed]}>
-            <Text style={styles.statLabel}>Sedang Dilayani</Text>
-            <Text style={[styles.statValue, styles.valueServed]}>
-              {lastInProgressTicket}
-            </Text>
-          </View>
-          <View style={[styles.statBox, styles.borderTotal]}>
-            <Text style={styles.statLabel}>Jumlah Antrian</Text>
-            <Text style={[styles.statValue, styles.valueTotal]}>
-              {totalQueue}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Layanan (Konten tidak diubah) */}
-      <View style={styles.scrollableContent}>
-        <Text style={styles.selectionTitle}>Butuh Layanan apa?</Text>
-
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Cari jenis layanan"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-        </View>
-
+      {/* <-- 3. Bungkus FlatList dan Footer dengan KeyboardAvoidingView */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         {loading ? (
           <ActivityIndicator
             size="large"
             color={COLORS.PRIMARY_ORANGE}
-            style={{ marginTop: 20 }}
+            style={{ flex: 1, justifyContent: 'center' }}
           />
         ) : (
           <FlatList
+            // <-- 4. Gunakan ListHeaderComponent
+            ListHeaderComponent={renderListHeader}
             data={filteredServices}
             renderItem={renderServiceItem}
             keyExtractor={(item) => item.id.toString()}
             style={styles.serviceList}
+            contentContainerStyle={{ paddingBottom: 20 }} // Beri sedikit padding di bawah
           />
         )}
-      </View>
 
-      {/* Tombol Next (Konten tidak diubah) */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.submitButton} onPress={handleNext}>
-          <Text style={styles.submitButtonText}>Selanjutnya</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Tombol Next (Footer) */}
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleNext}>
+            <Text style={styles.submitButtonText}>Selanjutnya</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
