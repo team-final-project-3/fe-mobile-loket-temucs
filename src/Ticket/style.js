@@ -1,133 +1,129 @@
-import { StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
+import { StyleSheet, Platform, StatusBar as RNStatusBar, Dimensions } from 'react-native';
 import { COLORS } from '../Constant/colors';
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-  // --- CONTAINER UTAMA ---
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    // Menambahkan padding atas untuk Android agar tidak tertimpa status bar transparan
     paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
-
-  // --- HEADER BARU DENGAN IMAGEBACKGROUND ---
+  scrollContainer: {
+    paddingBottom: 20,
+  },
   header: {
-    flexDirection: 'row',
+    height: 65,
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 80, // Sesuaikan tinggi header jika perlu
-    position: 'relative',
-    // backgroundColor dihapus
+    paddingBottom: 10,
   },
-
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: 'white', // Warna teks dibuat putih agar kontras
+    color: 'white',
+    top : "auto"
   },
-
-  // === KONTEN UTAMA ===
   content: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 25,
   },
   officeName: {
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#053F5C',
-    marginBottom: 4,
   },
   officeAddress: {
     fontSize: 14,
-    color: '#555',
+    color: '#666',
     marginBottom: 20,
   },
-
-  // === STATUS BOX ===
   statusBoxContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 12,
     marginBottom: 25,
   },
   statusBoxBlue: {
     flex: 1,
     borderWidth: 1.5,
     borderColor: '#429EBD',
-    borderRadius: 8,
-    padding: 12,
-    marginRight: 8,
+    borderRadius: 10,
+    paddingVertical: 16,
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#F0FAFF',
   },
   statusBoxOrange: {
     flex: 1,
     borderWidth: 1.5,
     borderColor: COLORS.PRIMARY_ORANGE,
-    borderRadius: 8,
-    padding: 12,
-    marginLeft: 8,
+    borderRadius: 10,
+    paddingVertical: 16,
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#FFF7F0',
   },
   statusLabel: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 4,
   },
   statusValue: {
-    fontSize: 25,
+    fontSize: 26,
     fontWeight: 'bold',
     color: '#053F5C',
   },
-
-  // === TIKET ===
   ticketCard: {
     backgroundColor: '#053F5C',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 20,
     alignItems: 'center',
     marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
   },
   branchText: {
     fontSize: 20,
     color: COLORS.background,
     fontWeight: '600',
     marginBottom: 15,
-    paddingBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.background,
+    paddingBottom: 8,
     width: '100%',
     textAlign: 'center',
   },
   ticketLabel: {
     fontSize: 16,
     color: COLORS.background,
-    marginBottom: 5,
-    marginTop: 15,
   },
   ticketNumber: {
-    fontSize: 50,
+    fontSize: 48,
     fontWeight: 'bold',
     color: COLORS.background,
-    marginBottom: 15,
+    marginVertical: 10,
   },
   dateText: {
-    fontSize: 12,
+    fontSize: 13,
     color: COLORS.background,
-    marginTop: 10,
   },
   printButton: {
     backgroundColor: '#28A745',
-    borderRadius: 8,
+    borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
   },
   printButtonText: {
-    color: COLORS.background,
+    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
   },
-
-  // === MODAL POP-UP ===
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
@@ -137,27 +133,22 @@ const styles = StyleSheet.create({
   },
   successModalContainer: {
     width: '90%',
-    maxWidth: 340,
+    maxWidth: 360,
     backgroundColor: 'white',
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 25,
+    borderRadius: 16,
+    padding: 25,
     alignItems: 'center',
-    position: 'relative',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 10,
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
   },
   closeButton: {
     position: 'absolute',
     top: 12,
     right: 12,
-    padding: 5,
+    zIndex: 2,
   },
   successIconContainer: {
     backgroundColor: COLORS.PRIMARY_ORANGE,
@@ -167,16 +158,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-    shadowColor: COLORS.PRIMARY_ORANGE,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 8,
-    borderWidth: 3,
-    borderColor: 'white',
   },
   successTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 25,
@@ -184,26 +168,22 @@ const styles = StyleSheet.create({
   },
   modalHomeButton: {
     backgroundColor: '#053F5C',
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 40,
-    borderRadius: 12,
+    borderRadius: 10,
   },
   modalHomeButtonText: {
     color: '#FFF',
     fontWeight: 'bold',
     fontSize: 16,
   },
-  homeButton: {
-    backgroundColor: '#053F5C',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-  },
-  homeButtonText: {
-    color: COLORS.background,
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  loadingContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#fff',
+},
+
 });
 
 export default styles;

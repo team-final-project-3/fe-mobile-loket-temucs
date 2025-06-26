@@ -10,8 +10,8 @@ import {
   ActivityIndicator,
   Alert,
   ImageBackground,
-  KeyboardAvoidingView, // Impor untuk keyboard
-  Platform,           // Impor untuk mendeteksi OS (iOS/Android)
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,7 +19,6 @@ import base64 from 'base-64';
 import styles from './style';
 import { COLORS } from '../Constant/colors';
 
-// Gambar header
 const headerBg = require('../../assets/images/header.png');
 
 const AmbilAntreanScreen = ({ navigation }) => {
@@ -55,7 +54,10 @@ const AmbilAntreanScreen = ({ navigation }) => {
 
         const headers = { Authorization: `Bearer ${token}` };
 
-        const profileRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`, { headers });
+        const profileRes = await fetch(
+          `https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`,
+          { headers }
+        );
         const profileData = await profileRes.json();
 
         if (!profileRes.ok) {
@@ -67,7 +69,10 @@ const AmbilAntreanScreen = ({ navigation }) => {
         setBranchName(profileData?.loket?.name || 'Nama Cabang');
         setBranchAddress(profileData?.loket?.branch?.address || 'Alamat belum tersedia');
 
-        const inProgressRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket`, { headers });
+        const inProgressRes = await fetch(
+          `https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket`,
+          { headers }
+        );
         if (inProgressRes.status === 404) {
           setLastInProgressTicket('-');
         } else {
@@ -75,7 +80,10 @@ const AmbilAntreanScreen = ({ navigation }) => {
           setLastInProgressTicket(inProgressData?.ticketNumber || '-');
         }
 
-        const countRes = await fetch(`https://temucs-tzaoj.ondigitalocean.app/api/queue/count/loket`, { headers });
+        const countRes = await fetch(
+          `https://temucs-tzaoj.ondigitalocean.app/api/queue/count/loket`,
+          { headers }
+        );
         const countData = await countRes.json();
         setTotalQueue(countData?.totalQueue ?? '-');
       } catch (error) {
@@ -93,7 +101,6 @@ const AmbilAntreanScreen = ({ navigation }) => {
     const trimmedName = namaLengkap.trim();
     const trimmedEmail = email.trim();
     const trimmedNoTelepon = noTelepon.trim();
-
     let isValid = true;
 
     if (!trimmedName) {
@@ -111,6 +118,12 @@ const AmbilAntreanScreen = ({ navigation }) => {
     }
 
     if (!isValid) return;
+
+    // ✅ LOG DATA NASABAH
+    console.log('[DATA NASABAH]');
+    console.log(`Nama Lengkap : ${trimmedName}`);
+    console.log(`Email        : ${trimmedEmail || '-'}`);
+    console.log(`No Telepon   : ${trimmedNoTelepon || '-'}`);
 
     navigation.navigate('LayananAntrean', {
       namaLengkap: trimmedName,
@@ -142,10 +155,7 @@ const AmbilAntreanScreen = ({ navigation }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1 }}>
           <View style={styles.contentWrapper}>
             {/* Info Cabang */}
             <View style={styles.branchInfoCard}>
@@ -165,7 +175,7 @@ const AmbilAntreanScreen = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Form Data Nasabah */}
+            {/* Form Nasabah */}
             <View style={styles.formContainer}>
               <Text style={styles.formTitle}>DATA NASABAH</Text>
 
@@ -214,7 +224,6 @@ const AmbilAntreanScreen = ({ navigation }) => {
                     setNoTelepon(text);
                     if (contactError) setContactError('');
                   }}
-                  // INI ADALAH BAGIAN YANG SUDAH DIPERBAIKI
                   placeholder={contactError || 'Masukkan nomor telepon Anda'}
                   placeholderTextColor={contactError ? 'red' : '#999'}
                   keyboardType="phone-pad"

@@ -6,9 +6,10 @@ import {
   StatusBar,
   TouchableOpacity,
   Modal,
-  ActivityIndicator,
   ImageBackground,
   ScrollView,
+  Alert,
+  Platform,
 } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,6 +17,18 @@ import { jwtDecode } from 'jwt-decode';
 import styles from './style';
 
 const headerBg = require('../../assets/images/header.png');
+
+const SkeletonBox = ({ width = '100%', height = 20, radius = 6, marginBottom = 10 }) => (
+  <View
+    style={{
+      width,
+      height,
+      backgroundColor: '#E5E7EB',
+      borderRadius: radius,
+      marginBottom,
+    }}
+  />
+);
 
 const TicketScreen = ({ navigation, route }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -33,6 +46,7 @@ const TicketScreen = ({ navigation, route }) => {
       try {
         const token = await AsyncStorage.getItem('userToken');
         if (!token) throw new Error('Token tidak ditemukan');
+
         const decoded = jwtDecode(token);
         const loketId = decoded?.loketId;
 
@@ -55,29 +69,31 @@ const TicketScreen = ({ navigation, route }) => {
           }),
         ]);
 
-        if (ticketRes && ticketRes.ok) setTicketDetail(await ticketRes.json());
+        if (ticketRes?.ok) setTicketDetail(await ticketRes.json());
 
-        if (profileRes && profileRes.ok) {
+        if (profileRes?.ok) {
           const profileData = await profileRes.json();
           setBranchName(profileData?.loket?.name || 'Nama Cabang');
           setBranchAddress(profileData?.loket?.branch?.address || 'Alamat tidak tersedia');
         }
 
-        if (lastTicketRes.status !== 404) {
+        if (lastTicketRes?.ok) {
           const lastTicketData = await lastTicketRes.json();
-          if (lastTicketRes.ok) setLastInProgressTicket(lastTicketData.ticketNumber || '-');
+          setLastInProgressTicket(lastTicketData.ticketNumber || '-');
         }
 
-        if (waitingRes && waitingRes.ok) {
+        if (waitingRes?.ok) {
           const waitingData = await waitingRes.json();
           setTotalWaiting(waitingData.length);
         }
       } catch (error) {
         console.error('Terjadi kesalahan saat fetch data:', error);
+        Alert.alert('Error', 'Gagal memuat data tiket.');
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [queueId]);
 
@@ -88,9 +104,43 @@ const TicketScreen = ({ navigation, route }) => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#053F5C" />
-      </View>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        <ImageBackground source={headerBg} style={styles.header} resizeMode="cover">
+          <Text style={styles.headerTitle}>Tiket Antrean</Text>
+        </ImageBackground>
+
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.content}>
+            {/* Skeleton: Nama Kantor & Alamat */}
+            <SkeletonBox width="60%" height={22} />
+            <SkeletonBox width="80%" height={16} />
+
+            {/* Skeleton: Status Box */}
+            <View style={styles.statusBoxContainer}>
+              <View style={styles.statusBoxBlue}>
+                <SkeletonBox width="50%" height={16} />
+                <SkeletonBox width="40%" height={24} />
+              </View>
+              <View style={styles.statusBoxOrange}>
+                <SkeletonBox width="50%" height={16} />
+                <SkeletonBox width="40%" height={24} />
+              </View>
+            </View>
+
+            {/* Skeleton: Ticket Card */}
+            <View style={styles.ticketCard}>
+              <SkeletonBox width="70%" height={18} />
+              <SkeletonBox width="50%" height={16} />
+              <SkeletonBox width="60%" height={30} />
+              <SkeletonBox width="90%" height={14} />
+            </View>
+
+            {/* Skeleton: Tombol Cetak */}
+            <SkeletonBox width="100%" height={45} radius={10} marginBottom={0} />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
@@ -98,6 +148,7 @@ const TicketScreen = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
+      {/* Modal Success Cetak */}
       <Modal
         transparent
         animationType="fade"
@@ -110,7 +161,7 @@ const TicketScreen = ({ navigation, route }) => {
               <Ionicons name="close" size={24} color="#888" />
             </TouchableOpacity>
             <View style={styles.successIconContainer}>
-              <FontAwesome5 name="smile-beam" size={48} color={'#FFF'} />
+              <FontAwesome5 name="smile-beam" size={48} color="#FFF" />
             </View>
             <Text style={styles.successTitle}>Tiket Berhasil di Cetak</Text>
             <TouchableOpacity style={styles.modalHomeButton} onPress={handleBackToHome}>
@@ -120,11 +171,12 @@ const TicketScreen = ({ navigation, route }) => {
         </View>
       </Modal>
 
+      {/* Header */}
       <ImageBackground source={headerBg} style={styles.header} resizeMode="cover">
         <Text style={styles.headerTitle}>Tiket Antrean</Text>
       </ImageBackground>
 
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.content}>
           <Text style={styles.officeName}>{branchName}</Text>
           <Text style={styles.officeAddress}>{branchAddress}</Text>
@@ -143,9 +195,7 @@ const TicketScreen = ({ navigation, route }) => {
           <View style={styles.ticketCard}>
             <Text style={styles.branchText}>Kantor Cabang {branchName}</Text>
             <Text style={styles.ticketLabel}>Nomor Antrian Anda</Text>
-            <Text style={styles.ticketNumber}>
-              {ticketDetail?.ticketNumber || '-'}
-            </Text>
+            <Text style={styles.ticketNumber}>{ticketDetail?.ticketNumber || '-'}</Text>
             <Text style={styles.dateText}>
               Tanggal Ambil Antrean:{' '}
               {ticketDetail?.bookingDate

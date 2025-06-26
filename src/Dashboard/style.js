@@ -11,51 +11,51 @@ const styles = StyleSheet.create({
   },
   contentWrapper: {
     paddingHorizontal: 16,
+    paddingTop: 20,
   },
+  // --- HEADER STYLES ---
   header: {
+    backgroundColor: '#053F5C',
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
+    paddingBottom: 12,
+    height: 'fit-content',
+  },
+  headerTop: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    height: 75,
-    marginTop: Platform.OS === 'android' ? -RNStatusBar.currentHeight : 0,
+    alignItems: 'center', // Ubah dari 'center' ke 'flex-start'
+    paddingHorizontal: 14,
+    paddingBottom:'10',// Tambahkan paddingTop agar lebih ke atas
+    marginTop:'-10',
   },
   profileIcon: {
-    padding: 3,
-    top: 10,
+    marginRight: 10,
+    marginTop: 0.5, // Tambahkan marginTop agar icon lebih ke atas
   },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    top: 10,
-  },
-  logoutButtonText: {
-    color: '#FFFFFF',
-    marginLeft: 5,
-    fontWeight: 'bold',
-    fontSize: 12,
+  headerTextContainer: {
+    flex: 1,
+    justifyContent: 'flex-start', // Ubah dari 'center' ke 'flex-start'
+    padding:'0',
   },
   welcomeText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#1F2937',
-    marginTop: 20,
+    color: '#FFFFFF',
+    marginBottom: 0, // Pastikan tidak ada margin bawah
+    marginTop: 0, // Tambahkan jika ingin lebih ke atas
   },
   dateText: {
-    fontSize: 15,
-    color: '#6B7280',
-    marginBottom: 20,
+    fontSize: 11,
+    color: '#FFFFFF',
+    opacity: 0.9,
+    marginTop: 0, // Pastikan tidak ada margin atas
   },
+
   currentQueueCard: {
     backgroundColor: '#053F5C',
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
     shadowColor: '#053F5C',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -73,37 +73,35 @@ const styles = StyleSheet.create({
     color: 'white',
     marginVertical: 10,
   },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 25,
+  },
   refreshButton: {
     flexDirection: 'row',
     backgroundColor: '#DC3545',
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    flex: 1,
+    marginRight: 8,
     shadowColor: '#DC3545',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 6,
   },
-  refreshButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  buttonDisabled: {
-    backgroundColor: '#E0A1A7',
-  },
   actionButton: {
     flexDirection: 'row',
     backgroundColor: '#28A745',
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 25,
+    flex: 1,
+    marginLeft: 8,
     shadowColor: '#28A745',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
@@ -112,90 +110,38 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 10,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  buttonDisabled: {
+    backgroundColor: '#E0A1A7',
   },
-  modalContainer: {
-    width: '85%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalContentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 25,
-  },
-  iconBackground: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#F27F0C',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  modalTextContainer: {
-    flex: 1,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  modalMessage: {
-    fontSize: 14,
-    color: '#666',
-  },
-  modalButtonContainer: {
+  listHeaderContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
-  },
-  modalButton: {
-    flex: 1,
-    borderRadius: 10,
-    paddingVertical: 12,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButton: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    marginRight: 10,
-  },
-  cancelButtonText: {
-    color: '#333',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  logoutModalButton: {
-    backgroundColor: '#DC3545',
-  },
-  logoutModalButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
+    marginBottom: 10,
   },
   listTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#1F2937',
-    marginBottom: 15,
+  },
+  nearestBranchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderColor: '#F27F0C',
+    borderWidth: 1,
+  },
+  nearestBranchButtonText: {
+    color: '#F27F0C',
+    fontWeight: '600',
+    marginLeft: 4,
+    fontSize: 10,
   },
   listWrapper: {
     borderRadius: 16,
@@ -255,7 +201,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
   },
-  filterButtonTextActive: {},
   tableContainer: {
     backgroundColor: 'white',
     paddingHorizontal: 15,
@@ -279,44 +224,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
-  },
+  },  
   tableCell: {
     fontSize: 14,
     color: '#374151',
-  },
-  ticketCell: {
-    fontWeight: 'bold',
-    color: '#053F5C',
-  },
-  nameCell: {
-    fontWeight: '500',
-  },
-  timeCell: {
-    color: '#6B7280',
-  },
-  statusCellContainer: {
-    alignItems: 'flex-start',
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  statusBadgeOnline: {
-    backgroundColor: '#D1FAE5',
-  },
-  statusBadgeOffline: {
-    backgroundColor: '#FEE2E2',
-  },
-  statusTextOnline: {
-    color: '#065F46',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  statusTextOffline: {
-    color: '#991B1B',
-    fontSize: 12,
-    fontWeight: 'bold',
   },
   emptyListText: {
     textAlign: 'center',

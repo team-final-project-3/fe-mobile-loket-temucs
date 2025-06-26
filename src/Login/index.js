@@ -35,62 +35,77 @@ export default function LoginScreen({ onLoginSuccess }) {
 
   const navigation = useNavigation();
 
-  const handleLogin = async () => {
-    const cleanedUsername = username;
-    let isValid = true;
+ const handleLogin = async () => {
+  const cleanedUsername = username.trim();
+  const cleanedPassword = password.trim();
+  let isValid = true;
 
-    setUsernameError("");
-    setPasswordError("");
+  setUsernameError("");
+  setPasswordError("");
 
-    if (cleanedUsername === "") {
-      setUsernameError("Username tidak boleh kosong");
-      isValid = false;
-    }
-    if (password.trim() === "") {
-      setPasswordError("Kata sandi tidak boleh kosong");
-      isValid = false;
-    }
+  if (cleanedUsername === "") {
+    setUsernameError("Username tidak boleh kosong");
+    isValid = false;
+  }
+  if (cleanedPassword === "") {
+    setPasswordError("Kata sandi tidak boleh kosong");
+    isValid = false;
+  }
 
-    if (!isValid) return;
+  if (!isValid) return;
 
-    setIsLoading(true);
+  setIsLoading(true);
 
-    try {
-      const response = await fetch(
-        "https://temucs-tzaoj.ondigitalocean.app/api/loket/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({ username: cleanedUsername, password }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        await AsyncStorage.setItem("userToken", data.token ?? "");
-        await AsyncStorage.setItem("loketId", String(data?.loket?.id ?? ""));
-        await AsyncStorage.setItem("username", data?.loket?.username ?? "");
-        await AsyncStorage.setItem("loketName", data?.loket?.name ?? "");
-        await AsyncStorage.setItem("branchName", data?.loket?.branch?.name ?? "");
-        await AsyncStorage.setItem("branchAddress", data?.loket?.branch?.address ?? "");
-        onLoginSuccess();
-      } else {
-        const errorMessage = data.message || "Username atau kata sandi salah";
-        Alert.alert("Login Gagal", errorMessage);
-        setUsernameError(" ");
-        setPasswordError(" ");
+  try {
+    const response = await fetch(
+      "https://temucs-tzaoj.ondigitalocean.app/api/loket/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          username: cleanedUsername,
+          password: cleanedPassword,
+        }),
       }
-    } catch (error) {
-      console.error("Network Error:", error);
-      Alert.alert("Terjadi Kesalahan", "Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
-    } finally {
-      setIsLoading(false);
+    );
+
+    const data = await response.json();
+    const timestamp = new Date().toISOString();
+
+    if (response.ok) {
+      const loket = data.loket || data.user || {};
+
+      await AsyncStorage.setItem("userToken", data.token ?? "");
+      await AsyncStorage.setItem("loketId", String(loket?.id ?? ""));
+      await AsyncStorage.setItem("username", loket?.username ?? "");
+      await AsyncStorage.setItem("loketName", loket?.name ?? "");
+      await AsyncStorage.setItem("branchName", loket?.branch?.name ?? "");
+      await AsyncStorage.setItem("branchAddress", loket?.branch?.address ?? "");
+
+      // ✅ Log tunggal untuk message dan token
+      console.log(`[LOGIN SUCCESS] ${data.message} | Token: ${data.token}`);
+
+      onLoginSuccess();
+    } else {
+      const errorMessage = data.message || "Username atau kata sandi salah";
+      setUsernameError(" ");
+      setPasswordError(errorMessage);
+
+      console.warn(`[LOGIN FAILED] ${errorMessage}`);
     }
-  };
+  } catch (error) {
+    console.error(`[LOGIN ERROR] ${error.message}`);
+    Alert.alert(
+      "Terjadi Kesalahan",
+      "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const navigateToTerms = () => {
     navigation.navigate("TermsAndConditions");
@@ -101,14 +116,9 @@ export default function LoginScreen({ onLoginSuccess }) {
   };
 
   return (
-    <ImageBackground
-      source={bgPattern}
-      style={styles.container}
-      resizeMode="cover"
-    >
+    <ImageBackground source={bgPattern} style={styles.container} resizeMode="cover">
       <StatusBar barStyle="light-content" />
       <View style={styles.bgOverlay} />
-
       <SafeAreaView style={{ flex: 1 }}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
@@ -137,7 +147,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                   <Text style={styles.label}>Username</Text>
                   <View style={[
                     styles.inputWrapper,
-                    usernameError ? styles.inputError : null
+                    usernameError ? styles.inputError : null,
                   ]}>
                     <Ionicons name="person-outline" style={styles.inputIcon} />
                     <TextInput
@@ -145,9 +155,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                       placeholder="Masukkan username Anda"
                       placeholderTextColor="#A0AEC0"
                       onChangeText={(text) => {
-                        const cleaned = text
-                          .replace(/^\s+|\s+$/g, '') // hapus spasi awal/akhir
-                          .replace(/\s{2,}/g, ' ');  // ganti spasi dobel jadi satu
+                        const cleaned = text.replace(/^\s+|\s+$/g, '').replace(/\s{2,}/g, ' ');
                         setUsername(cleaned);
                         setUsernameError("");
                         setPasswordError("");
@@ -156,7 +164,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                       autoCapitalize="none"
                     />
                   </View>
-                  {usernameError && !passwordError && (
+                  {usernameError !== "" && (
                     <Text style={styles.errorText}>{usernameError}</Text>
                   )}
                 </View>
@@ -165,7 +173,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                   <Text style={styles.label}>Kata Sandi</Text>
                   <View style={[
                     styles.inputWrapper,
-                    passwordError ? styles.inputError : null
+                    passwordError ? styles.inputError : null,
                   ]}>
                     <Ionicons name="lock-closed-outline" style={styles.inputIcon} />
                     <TextInput
@@ -191,8 +199,8 @@ export default function LoginScreen({ onLoginSuccess }) {
                       />
                     </TouchableOpacity>
                   </View>
-                  {passwordError && (
-                    <Text style={styles.errorText}>Username atau kata sandi salah</Text>
+                  {passwordError !== "" && (
+                    <Text style={styles.errorText}>{passwordError}</Text>
                   )}
                 </View>
 

@@ -208,6 +208,52 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  footer: {
+  padding: 20,
+  backgroundColor: '#fff',
+  borderTopWidth: 1,
+  borderTopColor: '#eee',
+  // Tambahan agar tombol tidak tertutup navigation gesture
+  paddingBottom: Platform.OS === 'android' ? 30 : 20,
+},
+
+submitButton: {
+  backgroundColor: '#28A745',
+  paddingVertical: 16,
+  borderRadius: 10,
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.2,
+  shadowRadius: 4,
+  elevation: 4,
+},
+
+submitButtonDisabled: {
+  backgroundColor: '#ccc',
+},
+quantityText: {
+  fontWeight: 'bold',
+  color: 'black',
+},
+  skeletonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingHorizontal: 10,
+  },
+  skeletonIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    marginRight: 10,
+  },
+  skeletonText: {
+    width: 220,
+    height: 16,
+    borderRadius: 4,
+  },
+
 });
 
 export default styles;
