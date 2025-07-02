@@ -73,9 +73,8 @@ const styles = StyleSheet.create({
     borderColor: '#A9A9A9',
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 15,
     color: '#666',
-    textTransform: 'uppercase',
     fontWeight: '600',
   },
   statValue: {

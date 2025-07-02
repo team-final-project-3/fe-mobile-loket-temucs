@@ -188,13 +188,17 @@ const AmbilAntreanScreen = ({ navigation }) => {
 
             <View style={styles.queueStatsContainer}>
               <View style={[styles.statBox, styles.borderServed]}>
-                <Text style={styles.statLabel}>Sedang Dilayani</Text>
+                <Text style={[styles.statLabel, { textTransform: "none" }]}>
+                  Sedang Dilayani
+                </Text>
                 <Text style={[styles.statValue, styles.valueServed]}>
                   {lastInProgressTicket}
                 </Text>
               </View>
               <View style={[styles.statBox, styles.borderTotal]}>
-                <Text style={styles.statLabel}>Total Antrian</Text>
+                <Text style={[styles.statLabel, { textTransform: "none" }]}>
+                  Total Antrean
+                </Text>
                 <Text style={[styles.statValue, styles.valueTotal]}>
                   {totalQueue}
                 </Text>

@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
 
   statLabel: {
-    fontSize: 12,
+    fontSize: 15,
     color: "#666",
     fontWeight: "600",
   },

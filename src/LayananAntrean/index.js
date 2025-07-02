@@ -185,13 +185,13 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
       <View style={styles.queueStatsContainer}>
         <View style={[styles.statBox, styles.borderServed]}>
-          <Text style={styles.statLabel}>Total Antrean</Text>
+          <Text style={[styles.statLabel]}>Sedang Dilayani</Text>
           <Text style={[styles.statValue, styles.valueServed]}>
             {lastInProgressTicket}
           </Text>
         </View>
         <View style={[styles.statBox, styles.borderTotal]}>
-          <Text style={styles.statLabel}>Jumlah Antrean</Text>
+          <Text style={styles.statLabel}>Total Antrean</Text>
           <Text style={[styles.statValue, styles.valueTotal]}>
             {totalQueue}
           </Text>
