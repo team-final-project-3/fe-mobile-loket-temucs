@@ -59,7 +59,9 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         );
         if (!profileResponse.ok) {
           const errorText = await profileResponse.text();
-          throw new Error(`Gagal mengambil profil: ${profileResponse.status} ${errorText}`);
+          throw new Error(
+            `Gagal mengambil profil: ${profileResponse.status} ${errorText}`
+          );
         }
         const profileData = await profileResponse.json();
         setBranchName(profileData?.loket?.name || "-");
@@ -71,7 +73,9 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         );
         if (!servicesResponse.ok) {
           const errorText = await servicesResponse.text();
-          throw new Error(`Gagal mengambil layanan: ${servicesResponse.status} ${errorText}`);
+          throw new Error(
+            `Gagal mengambil layanan: ${servicesResponse.status} ${errorText}`
+          );
         }
         const servicesData = await servicesResponse.json();
         setServices(servicesData);
@@ -85,7 +89,9 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         } else {
           const lastTicketData = await lastTicketRes.json();
           setLastInProgressTicket(
-            lastTicketRes.ok && lastTicketData?.ticketNumber ? lastTicketData.ticketNumber : "-"
+            lastTicketRes.ok && lastTicketData?.ticketNumber
+              ? lastTicketData.ticketNumber
+              : "-"
           );
         }
 
@@ -117,9 +123,17 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
   const handleSelectService = (service) => {
     const isSelected = selectedServices.some((s) => s.id === service.id);
+
     if (isSelected) {
       setSelectedServices(selectedServices.filter((s) => s.id !== service.id));
     } else {
+      if (selectedServices.length >= 5) {
+        Alert.alert(
+          "Batas Layanan",
+          "Anda hanya dapat memilih maksimal 5 layanan."
+        );
+        return;
+      }
       setSelectedServices([...selectedServices, service]);
     }
   };
@@ -148,7 +162,11 @@ const LayananAntreanScreen = ({ navigation, route }) => {
       >
         <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
           {isSelected && (
-            <Ionicons name="checkmark" size={16} color={COLORS.PRIMARY_ORANGE} />
+            <Ionicons
+              name="checkmark"
+              size={16}
+              color={COLORS.PRIMARY_ORANGE}
+            />
           )}
         </View>
         <Text style={styles.serviceName}>{item.serviceName}</Text>
@@ -158,9 +176,11 @@ const LayananAntreanScreen = ({ navigation, route }) => {
 
   const renderListHeader = () => (
     <>
-      <View style={styles.branchInfoCard}>
-        <Text style={styles.branchName}>{branchName}</Text>
-        <Text style={styles.branchAddress}>{branchAddress}</Text>
+      <View style={styles.branchInfoCardRow}>
+        <View style={styles.branchInfoTextContainer}>
+          <Text style={styles.branchName}>{branchName}</Text>
+          <Text style={styles.branchAddress}>{branchAddress}</Text>
+        </View>
       </View>
 
       <View style={styles.queueStatsContainer}>
@@ -178,7 +198,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         </View>
       </View>
 
-      <View style={{ paddingHorizontal: 20 }}>
+      <View style={styles.formSection}>
         <Text style={styles.selectionTitle}>Butuh Layanan apa?</Text>
         <View style={styles.searchContainer}>
           <TextInput
@@ -194,6 +214,16 @@ const LayananAntreanScreen = ({ navigation, route }) => {
             style={styles.searchIcon}
           />
         </View>
+        <Text
+          style={{
+            textAlign: "right",
+            marginTop: 5,
+            marginRight: 10,
+            color: "#888",
+          }}
+        >
+          Dipilih: {selectedServices.length} / 5
+        </Text>
       </View>
     </>
   );
@@ -206,8 +236,15 @@ const LayananAntreanScreen = ({ navigation, route }) => {
         translucent
       />
 
-      <ImageBackground source={headerBg} style={styles.header} resizeMode="cover">
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+      <ImageBackground
+        source={headerBg}
+        style={styles.header}
+        resizeMode="cover"
+      >
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Ionicons name="chevron-back-outline" size={30} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Pilih Layanan</Text>
@@ -232,7 +269,7 @@ const LayananAntreanScreen = ({ navigation, route }) => {
               renderItem={renderServiceItem}
               keyExtractor={(item) => item.id.toString()}
               style={styles.serviceList}
-              contentContainerStyle={{ paddingBottom: 120 }}
+              contentContainerStyle={{ paddingBottom: 140 }}
               keyboardShouldPersistTaps="handled"
             />
           )}

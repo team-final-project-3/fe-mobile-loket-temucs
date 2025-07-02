@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Animated,
@@ -7,10 +7,10 @@ import {
   Dimensions,
   Easing,
   Text,
-} from 'react-native';
-import styles from './style';
+} from "react-native";
+import styles from "./style";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const SplashScreen = () => {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -32,7 +32,6 @@ const SplashScreen = () => {
       }),
     ]).start();
 
-    // Biarkan App.js yang kontrol navigasi setelah 2 detik
   }, []);
 
   return (
@@ -48,7 +47,7 @@ const SplashScreen = () => {
           ]}
         >
           <Image
-            source={require('../../assets/images/logoo.jpg')}
+            source={require("../../assets/images/logoo.jpg")}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -57,7 +56,7 @@ const SplashScreen = () => {
 
       <View style={styles.footer}>
         <Animated.Text style={[styles.footerText, { opacity: opacityAnim }]}>
-          © {new Date().getFullYear()} - All rights reserved by Team 3 -{' '}
+          © {new Date().getFullYear()} - All rights reserved by Team 3 -{" "}
           <Text style={styles.bold}>Continental</Text>
         </Animated.Text>
       </View>

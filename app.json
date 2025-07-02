@@ -1,29 +1,33 @@
 {
+  "name": "temu-cs",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    // ... daftar dependensi Anda akan ada di sini ...
+    "expo": "~51.0.8",
+    "react": "18.2.0",
+    "react-native": "0.74.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  },
+  "private": true,
+  // INI BAGIAN YANG PERLU ANDA TAMBAH/EDIT
   "expo": {
-    "name": "temu-cs",
-    "slug": "fp-app",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "jwt-decode",
+          "base-64",
+          "moment"
+        ]
+      }
     }
   }
 }

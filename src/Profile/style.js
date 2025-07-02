@@ -2,13 +2,10 @@ import { StyleSheet, Platform } from 'react-native';
 import { COLORS } from '../Constant/colors';
 
 const styles = StyleSheet.create({
-  // --- STRUKTUR DASAR ---
   container: {
     flex: 1,
-    backgroundColor: '#053F5C', // Warna dasar disamakan dengan header
+    backgroundColor: '#053F5C',
   },
-
-  // --- HEADER TERPADU ---
   header: {
     height: 300,
     justifyContent: 'center',
@@ -20,12 +17,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Platform.OS === 'android' ? 50 : 60,
     left: 20,
-    padding: 5,
-  },
-  logoutButton: {
-    position: 'absolute',
-    top: Platform.OS === 'android' ? 50 : 60,
-    right: 20,
     padding: 5,
   },
   profileInfoContainer: {
@@ -48,9 +39,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
-
-  // --- KONTEN UTAMA ---
   contentBody: {
     flex: 1,
     backgroundColor: '#F4F6F8',
@@ -109,8 +101,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F2F5',
     marginHorizontal: 20,
   },
-
-  // --- MODAL LOGOUT ---
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -137,7 +127,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#F27F0C',
+    backgroundColor: '#E2B282',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15,
@@ -154,6 +144,7 @@ const styles = StyleSheet.create({
   modalMessage: {
     fontSize: 14,
     color: '#666',
+    lineHeight: 20,
   },
   modalButtonContainer: {
     flexDirection: 'row',
@@ -185,6 +176,28 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  bottomButtonContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: Platform.OS === 'android' ? 30 : 20,
+    backgroundColor: '#F4F6F8',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  logoutBottomButton: {
+    backgroundColor: '#DC3545',
+    paddingVertical: 14,
+    borderRadius: 10,
+    elevation: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutBottomButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',F
   },
 });
 

@@ -14,11 +14,9 @@ import {
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import base64 from "base-64";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-
 import styles from "./style";
 
 const headerBg = require("../../assets/images/header.png");
@@ -124,6 +122,7 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
       );
 
       const responseJson = await response.json();
+      console.log("📥 RESPONSE AMBIL ANTREAN:", responseJson);
 
       if (!response.ok) {
         throw new Error(
@@ -143,7 +142,10 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
   const handleLihatTiket = () => {
     setShowSuccessModal(false);
     navigation.popToTop();
-    navigation.navigate("Ticket", { queueId: queueIdRef.current });
+    navigation.navigate("Ticket", {
+      queueId: queueIdRef.current,
+      namaLengkap: namaLengkap, // penting agar nama ditampilkan di Ticket
+    });
   };
 
   const handleAmbilAntreanPress = () => {
@@ -192,16 +194,12 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
           <View style={styles.modalContainer}>
             <View style={styles.modalContentRow}>
               <View style={styles.modalIconWrapper}>
-                <MaterialCommunityIcons
-                  name="emoticon-confused-outline"
-                  size={45}
-                  color="#fff"
-                />
+                <Feather name="smile" size={55} color="#E2B282" />
               </View>
               <View style={styles.modalTextContainer}>
                 <Text style={styles.modalTitle}>Apakah Anda Yakin?</Text>
                 <Text style={styles.modalMessage}>
-                  Anda akan membuat antrean baru
+                  Anda akan menyetujui pembuatan antrean
                 </Text>
               </View>
             </View>
@@ -239,10 +237,13 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
           <View style={styles.modalContainer}>
             <View style={{ alignItems: "center", marginBottom: 20 }}>
               <View style={styles.successIconWrapper}>
-                <FontAwesome5 name="smile-beam" size={48} color={"white"} />
+                <MaterialCommunityIcons
+                  name="emoticon-happy"
+                  size={56}
+                  color={"white"}
+                />
               </View>
               <Text style={styles.successTitle}>Antrean Berhasil Dibuat!</Text>
-              <Text style={styles.modalMessage}>Silahkan lihat tiket Anda</Text>
             </View>
             <TouchableOpacity
               style={styles.successButton}
@@ -279,7 +280,6 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
                 pilih.
               </Text>
             ) : (
-              // --- BAGIAN RENDER YANG DISESUAIKAN ---
               documents.map((doc) => (
                 <View key={doc.id} style={styles.documentItem}>
                   <Ionicons name="checkmark-circle" size={22} color="#28A745" />
@@ -294,9 +294,11 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
             )}
           </View>
         </ScrollView>
+      </View>
 
-        {/* Tombol */}
-        <View style={styles.footer}>
+      {/* Tombol Ambil Antrean */}
+      <SafeAreaView style={styles.footerWrapper}>
+        <View style={styles.footerInner}>
           <TouchableOpacity
             style={[
               styles.submitButton,
@@ -312,7 +314,7 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
             )}
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     </SafeAreaView>
   );
 };

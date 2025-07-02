@@ -11,45 +11,36 @@ const styles = StyleSheet.create({
   },
   contentWrapper: {
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 10,
   },
-  // --- HEADER STYLES ---
-  header: {
-    backgroundColor: '#053F5C',
-    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
-    paddingBottom: 12,
-    height: 'fit-content',
+  headerImage: {
+    width: "100%",
+    paddingBottom: 20,
+    marginTop: -40,
   },
   headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center', // Ubah dari 'center' ke 'flex-start'
-    paddingHorizontal: 14,
-    paddingBottom:'10',// Tambahkan paddingTop agar lebih ke atas
-    marginTop:'-10',
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    marginTop: 15,
   },
   profileIcon: {
     marginRight: 10,
-    marginTop: 0.5, // Tambahkan marginTop agar icon lebih ke atas
   },
   headerTextContainer: {
     flex: 1,
-    justifyContent: 'flex-start', // Ubah dari 'center' ke 'flex-start'
-    padding:'0',
+    justifyContent: "center",
   },
   welcomeText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 0, // Pastikan tidak ada margin bawah
-    marginTop: 0, // Tambahkan jika ingin lebih ke atas
+    fontWeight: "bold",
+    color: "#FFFFFF",
   },
   dateText: {
     fontSize: 11,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     opacity: 0.9,
-    marginTop: 0, // Pastikan tidak ada margin atas
   },
-
   currentQueueCard: {
     backgroundColor: '#053F5C',
     borderRadius: 16,
@@ -184,22 +175,27 @@ const styles = StyleSheet.create({
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 12,
-    height: 44,
+    paddingHorizontal: 14,
+    height: 36,
     borderRadius: 10,
+    backgroundColor: '#F9F9F9',
   },
   filterButtonOnline: {
-    backgroundColor: '#E0F2F1',
+    backgroundColor: '#ABEEBA',
   },
   filterButtonOffline: {
-    backgroundColor: '#FCE4EC',
+    backgroundColor: '#FFA3A3',
   },
   filterButtonText: {
-    color: '#374151',
-    fontWeight: '600',
-    marginLeft: 8,
+    color: 'black',
     fontSize: 14,
+    fontWeight: '500',
+  },
+  statusIndicator: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
   },
   tableContainer: {
     backgroundColor: 'white',
@@ -224,7 +220,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
-  },  
+  },
   tableCell: {
     fontSize: 14,
     color: '#374151',

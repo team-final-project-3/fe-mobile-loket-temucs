@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,11 @@ import {
   FlatList,
   ImageBackground,
   StatusBar,
-  ActivityIndicator,
   Alert,
 } from "react-native";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./style";
 
@@ -37,14 +37,29 @@ const getDistance = (lat1, lon1, lat2, lon2) => {
 export default function NearestBranchScreen({ navigation }) {
   const [branches, setBranches] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
-  const [sortOption, setSortOption] = useState("terdekat");
-  const [showSortModal, setShowSortModal] = useState(false);
+  const [sortOption, setSortOption] = useState("asc");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   useEffect(() => {
     getLocationAndFetchBranches();
-  }, [sortOption]);
+  }, []);
+
+  const toggleSortOption = () => {
+    const newOption = sortOption === "asc" ? "desc" : "asc";
+    setSortOption(newOption);
+
+    if (userLocation) {
+      setLoading(true);
+      fetchBranches(userLocation.latitude, userLocation.longitude, newOption);
+    }
+  };
 
   const getLocationAndFetchBranches = async () => {
     try {
@@ -61,13 +76,13 @@ export default function NearestBranchScreen({ navigation }) {
       const { latitude, longitude } = location.coords;
       setUserLocation({ latitude, longitude });
 
-      fetchBranches(latitude, longitude);
+      fetchBranches(latitude, longitude, sortOption);
     } catch (error) {
       console.error("Gagal mengambil lokasi:", error);
     }
   };
 
-  const fetchBranches = async (userLat, userLon) => {
+  const fetchBranches = async (userLat, userLon, sort = "asc") => {
     try {
       const token = await AsyncStorage.getItem("userToken");
       if (!token) throw new Error("Token tidak ditemukan");
@@ -77,11 +92,11 @@ export default function NearestBranchScreen({ navigation }) {
       });
 
       const result = await response.json();
-      if (!result || !Array.isArray(result.branches)) {
-        throw new Error('Response does not contain "branches" array');
+      if (!result || !Array.isArray(result.data)) {
+        throw new Error('Response does not contain "data" array');
       }
 
-      const branchesWithQueue = result.branches.map((branch) => {
+      const branchesWithQueue = result.data.map((branch) => {
         const distance =
           userLat && userLon
             ? getDistance(
@@ -104,13 +119,9 @@ export default function NearestBranchScreen({ navigation }) {
         };
       });
 
-      if (sortOption === "terdekat") {
-        branchesWithQueue.sort(
-          (a, b) => parseFloat(a.distance) - parseFloat(b.distance)
-        );
-      } else if (sortOption === "antrian-terkecil") {
+      if (sort === "asc") {
         branchesWithQueue.sort((a, b) => a.queue - b.queue);
-      } else if (sortOption === "antrian-terbanyak") {
+      } else {
         branchesWithQueue.sort((a, b) => b.queue - a.queue);
       }
 
@@ -122,11 +133,13 @@ export default function NearestBranchScreen({ navigation }) {
     }
   };
 
-  const filteredBranches = branches.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBranches = useMemo(() => {
+    return branches.filter(
+      (item) =>
+        item.name.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+        item.address.toLowerCase().includes(debouncedQuery.toLowerCase())
+    );
+  }, [branches, debouncedQuery]);
 
   const renderBranchCard = ({ item }) => (
     <View style={styles.card}>
@@ -173,57 +186,18 @@ export default function NearestBranchScreen({ navigation }) {
     <View style={styles.card}>
       <View style={styles.cardContent}>
         <View style={styles.leftSection}>
-          <View
-            style={[styles.iconContainer, { backgroundColor: "#E5E7EB" }]}
-          />
-          <View
-            style={{
-              width: 30,
-              height: 8,
-              backgroundColor: "#E5E7EB",
-              borderRadius: 4,
-            }}
-          />
+          <View style={[styles.iconContainer, styles.skeletonIcon]} />
+          <View style={styles.skeletonLineShort} />
         </View>
 
         <View style={styles.middleSection}>
-          <View
-            style={{
-              width: "60%",
-              height: 14,
-              backgroundColor: "#E5E7EB",
-              borderRadius: 4,
-              marginBottom: 8,
-            }}
-          />
-          <View
-            style={{
-              width: "90%",
-              height: 10,
-              backgroundColor: "#E5E7EB",
-              borderRadius: 4,
-            }}
-          />
+          <View style={styles.skeletonLineMedium} />
+          <View style={styles.skeletonLineLong} />
         </View>
 
         <View style={styles.rightSection}>
-          <View
-            style={{
-              width: 60,
-              height: 20,
-              backgroundColor: "#E5E7EB",
-              borderRadius: 20,
-              marginBottom: 8,
-            }}
-          />
-          <View
-            style={{
-              width: 70,
-              height: 16,
-              backgroundColor: "#E5E7EB",
-              borderRadius: 12,
-            }}
-          />
+          <View style={styles.skeletonStatus} />
+          <View style={styles.skeletonQueue} />
         </View>
       </View>
     </View>
@@ -263,48 +237,19 @@ export default function NearestBranchScreen({ navigation }) {
             />
           </View>
 
-          <View style={styles.dropdownContainer}>
-            <TouchableOpacity
-              style={styles.sortButton}
-              onPress={() => setShowSortModal((prev) => !prev)}
-            >
-              <Ionicons name="filter" size={15} color="#333" />
-              <Text style={styles.sortButtonText}>
-                {sortOption === "antrian-terkecil"
-                  ? "⬆️ Terkecil"
-                  : sortOption === "antrian-terbanyak"
-                  ? "⬇️ Terbanyak"
-                  : "Filter"}
-              </Text>
-            </TouchableOpacity>
-
-            {showSortModal && (
-              <View style={styles.dropdownMenu}>
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    setSortOption("antrian-terkecil");
-                    setShowSortModal(false);
-                  }}
-                >
-                  <Text style={styles.dropdownItemText}>
-                    ⬆️ Antrian Terkecil
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    setSortOption("antrian-terbanyak");
-                    setShowSortModal(false);
-                  }}
-                >
-                  <Text style={styles.dropdownItemText}>
-                    ⬇️ Antrian Terbanyak
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+          <TouchableOpacity
+            style={styles.sortButton}
+            onPress={toggleSortOption}
+          >
+            <FontAwesome5
+              name={
+                sortOption === "asc" ? "sort-amount-down-alt" : "sort-amount-up"
+              }
+              size={18}
+              color="#333"
+            />
+            <Text style={styles.sortButtonText}>Sort by</Text>
+          </TouchableOpacity>
         </View>
 
         {loading ? (
@@ -322,6 +267,18 @@ export default function NearestBranchScreen({ navigation }) {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            initialNumToRender={5}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            ListEmptyComponent={
+              <View style={{ alignItems: "center", marginTop: 40 }}>
+                <Ionicons name="alert-circle-outline" size={48} color="#ccc" />
+                <Text style={{ color: "#888", marginTop: 10 }}>
+                  Cabang tidak ditemukan
+                </Text>
+              </View>
+            }
           />
         )}
       </View>

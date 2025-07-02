@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   ScrollView,
   ImageBackground,
   ActivityIndicator,
+  Platform,
+  StatusBar as RNStatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./style";
@@ -141,19 +143,33 @@ export default function DashboardScreen({ navigation }) {
 
   const renderFilterButton = () => {
     let label = "Filter";
+    let statusColor = "#999";
     let style = styles.filterButton;
 
     if (filterStatus === "online") {
       label = "Online";
       style = [styles.filterButton, styles.filterButtonOnline];
+      statusColor = "#28A745";
     } else if (filterStatus === "offline") {
       label = "Offline";
       style = [styles.filterButton, styles.filterButtonOffline];
+      statusColor = "#DC3545";
     }
 
     return (
       <TouchableOpacity style={style} onPress={handleFilterChange}>
-        <Ionicons name="filter" size={20} color="#333" />
+        {filterStatus === "all" ? (
+          <Ionicons
+            name="filter-outline"
+            size={20}
+            color="#333"
+            style={{ marginRight: 8 }}
+          />
+        ) : (
+          <View
+            style={[styles.statusIndicator, { backgroundColor: statusColor }]}
+          />
+        )}
         <Text style={styles.filterButtonText}>{label}</Text>
       </TouchableOpacity>
     );
@@ -166,7 +182,7 @@ export default function DashboardScreen({ navigation }) {
         {item.nama}
       </Text>
       <Text style={[styles.tableCell, { flex: 2 }]}>{item.status}</Text>
-      <Text style={[styles.tableCell, { flex: 1.5, textAlign: "right" }]}> 
+      <Text style={[styles.tableCell, { flex: 1.5, textAlign: "right" }]}>
         {item.waktu + ""}
       </Text>
     </View>
@@ -177,7 +193,13 @@ export default function DashboardScreen({ navigation }) {
       {[2, 3, 2, 1.5].map((flex, i) => (
         <View
           key={i}
-          style={{ flex, height: 12, backgroundColor: '#E0E0E0', borderRadius: 4, marginHorizontal: 4 }}
+          style={{
+            flex,
+            height: 12,
+            backgroundColor: "#E0E0E0",
+            borderRadius: 4,
+            marginHorizontal: 4,
+          }}
         />
       ))}
     </View>
@@ -185,21 +207,41 @@ export default function DashboardScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      <ImageBackground source={headerBg} style={styles.header} resizeMode="cover">
-        <View style={styles.headerTop}>
-          <TouchableOpacity
-            style={styles.profileIcon}
-            onPress={() => navigation.navigate("Profile")}
-          >
-            <Ionicons name="person-circle" size={40} color="white" />
-          </TouchableOpacity>
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.welcomeText}>{greeting}, {branchName}</Text>
-            <Text style={styles.dateText}>{formattedDate}</Text>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop:
+              Platform.OS === "android" ? RNStatusBar.currentHeight : 44,
+          },
+        ]}
+      >
+        <ImageBackground
+          source={headerBg}
+          style={styles.headerImage}
+          resizeMode="cover"
+        >
+          <View style={styles.headerTop}>
+            <TouchableOpacity
+              style={styles.profileIcon}
+              onPress={() => navigation.navigate("Profile")}
+            >
+              <Ionicons name="person-circle" size={40} color="white" />
+            </TouchableOpacity>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.welcomeText}>
+                {greeting}, {branchName}
+              </Text>
+              <Text style={styles.dateText}>{formattedDate}</Text>
+            </View>
           </View>
-        </View>
-      </ImageBackground>
+        </ImageBackground>
+      </View>
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.contentWrapper}>
@@ -210,7 +252,10 @@ export default function DashboardScreen({ navigation }) {
 
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity
-              style={[styles.refreshButton, isRefreshing && styles.buttonDisabled]}
+              style={[
+                styles.refreshButton,
+                isRefreshing && styles.buttonDisabled,
+              ]}
               onPress={handleRefreshPress}
               disabled={isRefreshing}
             >
@@ -238,14 +283,21 @@ export default function DashboardScreen({ navigation }) {
               onPress={() => navigation.navigate("NearestBranch")}
             >
               <FontAwesome6 name="map-location-dot" size={20} color="#F27F0C" />
-              <Text style={styles.nearestBranchButtonText}>Cabang Terdekat</Text>
+              <Text style={styles.nearestBranchButtonText}>
+                Cabang Terdekat
+              </Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.listWrapper}>
             <View style={styles.searchFilterSection}>
               <View style={styles.searchContainer}>
-                <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+                <Ionicons
+                  name="search"
+                  size={20}
+                  color="#888"
+                  style={styles.searchIcon}
+                />
                 <TextInput
                   style={styles.searchInput}
                   placeholder="Cari nama atau no. tiket"
@@ -259,10 +311,21 @@ export default function DashboardScreen({ navigation }) {
 
             <View style={styles.tableContainer}>
               <View style={styles.tableHeader}>
-                <Text style={[styles.tableHeaderText, { flex: 2 }]}>No Tiket</Text>
+                <Text style={[styles.tableHeaderText, { flex: 2 }]}>
+                  No Tiket
+                </Text>
                 <Text style={[styles.tableHeaderText, { flex: 3 }]}>Nama</Text>
-                <Text style={[styles.tableHeaderText, { flex: 2 }]}>Status</Text>
-                <Text style={[styles.tableHeaderText, { flex: 1.5, textAlign: "right" }]}>Waktu</Text>
+                <Text style={[styles.tableHeaderText, { flex: 2 }]}>
+                  Status
+                </Text>
+                <Text
+                  style={[
+                    styles.tableHeaderText,
+                    { flex: 1.5, textAlign: "right" },
+                  ]}
+                >
+                  Waktu
+                </Text>
               </View>
 
               {isLoading ? (

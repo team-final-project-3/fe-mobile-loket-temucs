@@ -1,13 +1,12 @@
 import { StyleSheet, Platform } from 'react-native';
 
 const styles = StyleSheet.create({
-  // --- STRUKTUR DASAR ---
   container: {
     flex: 1,
-    backgroundColor: '#053F5C', // Warna dasar gelap agar header menyatu
+    backgroundColor: '#053F5C',
   },
   header: {
-    height: 110, // Header yang lebih tinggi dan proporsional
+    height: 110,
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: Platform.OS === 'android' ? 25 : 0,
@@ -24,19 +23,17 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
   },
-
-  // --- KONTEN UTAMA "SHEET" ---
   contentBody: {
-    flex: 1, // Ini adalah kunci agar konten mengisi ruang yang tersedia
-    backgroundColor: '#FFFFFF', // Warna dasar putih bersih
+    flex: 1,
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
-    marginTop: -20, // Efek menumpuk di bawah header
-    overflow: 'hidden', // Memastikan konten di dalamnya tidak keluar dari radius
+    marginTop: -20,
+    overflow: 'hidden',
   },
   scrollViewContent: {
     padding: 25,
-    paddingBottom: 40, // Beri ruang di akhir scroll
+    paddingBottom: 40,
   },
   pageTitle: {
     fontSize: 20,
@@ -56,12 +53,10 @@ const styles = StyleSheet.create({
   },
   paragraph: {
     fontSize: 15,
-    lineHeight: 24, // Jarak antar baris yang nyaman untuk dibaca
+    lineHeight: 24,
     color: '#4B5563',
-    textAlign: 'justify', // Teks rata kiri-kanan agar terlihat rapi
+    textAlign: 'justify',
   },
-  
-  // --- FOOTER & TOMBOL AKSI ---
   footer: {
     padding: 20,
     backgroundColor: '#FFFFFF',
@@ -69,7 +64,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#F0F2F5',
   },
   agreeButton: {
-    backgroundColor: '#053F5C', // Warna konsisten dengan tema
+    backgroundColor: '#053F5C',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
