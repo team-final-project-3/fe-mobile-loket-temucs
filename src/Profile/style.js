@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   logoutBottomButtonText: {
     color: 'white',
     fontSize: 16,
-    fontWeight: 'bold',F
+    fontWeight: 'bold',
   },
 });
 
