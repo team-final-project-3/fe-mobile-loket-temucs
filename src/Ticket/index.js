@@ -174,7 +174,7 @@ const TicketScreen = ({ navigation, route }) => {
               <Text style={styles.statusValue}>{lastInProgressTicket}</Text>
             </View>
             <View style={styles.statusBoxOrange}>
-              <Text style={styles.statusLabel}>Jumlah Menunggu</Text>
+              <Text style={styles.statusLabel}>Total Antrean</Text>
               <Text style={styles.statusValue}>{totalWaiting}</Text>
             </View>
           </View>

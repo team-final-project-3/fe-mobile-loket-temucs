@@ -194,7 +194,7 @@ const AmbilAntreanScreen = ({ navigation }) => {
                 </Text>
               </View>
               <View style={[styles.statBox, styles.borderTotal]}>
-                <Text style={styles.statLabel}>Jumlah Antrian</Text>
+                <Text style={styles.statLabel}>Total Antrian</Text>
                 <Text style={[styles.statValue, styles.valueTotal]}>
                   {totalQueue}
                 </Text>
