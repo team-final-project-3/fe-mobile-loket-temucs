@@ -11,6 +11,7 @@ import {
   Alert,
   Platform,
   ActivityIndicator,
+  StatusBar as RNStatusBar,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,6 +19,7 @@ import { jwtDecode } from "jwt-decode";
 import styles from "./style";
 
 const headerBg = require("../../assets/images/header.png");
+const API_URL = "https://temucs-tzaoj.ondigitalocean.app";
 
 const TicketScreen = ({ navigation, route }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -43,33 +45,21 @@ const TicketScreen = ({ navigation, route }) => {
         const [ticketRes, profileRes, lastTicketRes, waitingRes] =
           await Promise.all([
             queueId
-              ? fetch(
-                  `https://temucs-tzaoj.ondigitalocean.app/api/queue/loket-ticket/${queueId}`,
-                  {
-                    headers: { Authorization: `Bearer ${token}` },
-                  }
-                )
+              ? fetch(`${API_URL}/api/queue/loket-ticket/${queueId}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                })
               : Promise.resolve(null),
             loketId
-              ? fetch(
-                  `https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`,
-                  {
-                    headers: { Authorization: `Bearer ${token}` },
-                  }
-                )
+              ? fetch(`${API_URL}/api/loket/${loketId}/profile`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                })
               : Promise.resolve(null),
-            fetch(
-              `https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket`,
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            ),
-            fetch(
-              `https://temucs-tzaoj.ondigitalocean.app/api/queue/waiting/loket`,
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
-            ),
+            fetch(`${API_URL}/api/queue/inprogress/loket`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            fetch(`${API_URL}/api/queue/waiting/loket`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
           ]);
 
         if (ticketRes?.ok) setTicketDetail(await ticketRes.json());
@@ -85,6 +75,8 @@ const TicketScreen = ({ navigation, route }) => {
         if (lastTicketRes?.ok) {
           const lastTicketData = await lastTicketRes.json();
           setLastInProgressTicket(lastTicketData.ticketNumber || "-");
+        } else {
+          setLastInProgressTicket("-");
         }
 
         if (waitingRes?.ok) {
@@ -109,26 +101,44 @@ const TicketScreen = ({ navigation, route }) => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor="transparent"
-          translucent
-        />
+      <View style={styles.loadingContainer}>
+        <StatusBar barStyle="dark-content" />
         <ActivityIndicator size="large" color="#053F5C" />
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
         translucent
       />
 
-      <Modal transparent animationType="fade" visible={isModalVisible}>
+      {/* --- PERUBAHAN --- Struktur Header disesuaikan */}
+      <ImageBackground
+        source={headerBg}
+        style={{ width: "100%" }}
+        resizeMode="cover"
+      >
+        <View
+          style={{
+            paddingTop: Platform.OS === "android" ? RNStatusBar.currentHeight : 44,
+            paddingBottom: 20,
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.headerTitle}>Tiket Antrean</Text>
+        </View>
+      </ImageBackground>
+
+      <Modal
+        transparent
+        animationType="fade"
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.successModalContainer}>
             <TouchableOpacity
@@ -138,9 +148,10 @@ const TicketScreen = ({ navigation, route }) => {
               <Ionicons name="close" size={24} color="#888" />
             </TouchableOpacity>
             <View style={styles.successIconContainer}>
+              {/* --- PERUBAHAN --- Ikon diubah menjadi centang */}
               <MaterialCommunityIcons
-                name="emoticon-happy"
-                size={65}
+                name="check-bold"
+                size={50}
                 color="#FFF"
               />
             </View>
@@ -155,59 +166,65 @@ const TicketScreen = ({ navigation, route }) => {
         </View>
       </Modal>
 
-      <ImageBackground
-        source={headerBg}
-        style={styles.header}
-        resizeMode="cover"
-      >
-        <Text style={styles.headerTitle}>Tiket Antrean</Text>
-      </ImageBackground>
+      {/* --- PERUBAHAN --- Konten dibungkus dengan SafeAreaView */}
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.content}>
+            <Text style={styles.officeName}>{branchName}</Text>
+            <Text style={styles.officeAddress}>{branchAddress}</Text>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.content}>
-          <Text style={styles.officeName}>{branchName}</Text>
-          <Text style={styles.officeAddress}>{branchAddress}</Text>
-
-          <View style={styles.statusBoxContainer}>
-            <View style={styles.statusBoxBlue}>
-              <Text style={styles.statusLabel}>Terakhir Dilayani</Text>
-              <Text style={styles.statusValue}>{lastInProgressTicket}</Text>
+            <View style={styles.statusBoxContainer}>
+              <View style={styles.statusBoxBlue}>
+                <Text style={styles.statusLabel}>Sedang Dilayani</Text>
+                <Text style={[styles.statusValue, styles.statusValueBlue]}>
+                  {lastInProgressTicket}
+                </Text>
+              </View>
+              <View style={styles.statusBoxGray}>
+                <Text style={styles.statusLabel}>Total Antrean</Text>
+                <Text style={[styles.statusValue, styles.statusValueGray]}>
+                  {totalWaiting}
+                </Text>
+              </View>
             </View>
-            <View style={styles.statusBoxOrange}>
-              <Text style={styles.statusLabel}>Total Antrean</Text>
-              <Text style={styles.statusValue}>{totalWaiting}</Text>
+
+            <View style={styles.ticketCard}>
+              <Text style={styles.branchText}>Kantor Cabang {branchName}</Text>
+
+              {/* --- MODIFIKASI BAGIAN INI --- */}
+              {/* Menggunakan View sebagai container agar background bisa full-width */}
+              {namaLengkap ? (
+                <View style={styles.userGreetingContainer}>
+                  <Text style={styles.userGreetingText}>Hai, {namaLengkap}</Text>
+                </View>
+              ) : null}
+              {/* --- AKHIR MODIFIKASI --- */}
+
+              <Text style={styles.ticketLabel}>Nomor Antrean Anda</Text>
+              <Text style={styles.ticketNumber}>
+                {ticketDetail?.ticketNumber || "-"}
+              </Text>
+
+              <Text style={styles.dateText}>
+                Tanggal Ambil Antrean:{" "}
+                {ticketDetail?.bookingDate
+                  ? new Date(ticketDetail.bookingDate).toLocaleDateString("id-ID", {
+                      day: '2-digit', month: 'long', year: 'numeric'
+                    })
+                  : "-"}
+              </Text>
             </View>
+
+            <TouchableOpacity
+              style={styles.printButton}
+              onPress={() => setIsModalVisible(true)}
+            >
+              <Text style={styles.printButtonText}>Cetak Tiket</Text>
+            </TouchableOpacity>
           </View>
-
-          <View style={styles.ticketCard}>
-            <Text style={styles.branchText}>Kantor Cabang {branchName}</Text>
-
-            {namaLengkap ? (
-              <Text style={styles.userGreeting}>Hai, {namaLengkap}</Text>
-            ) : null}
-
-            <Text style={styles.ticketLabel}>Nomor Antrean Anda</Text>
-            <Text style={styles.ticketNumber}>
-              {ticketDetail?.ticketNumber || "-"}
-            </Text>
-
-            <Text style={styles.dateText}>
-              Tanggal Ambil Antrean:{" "}
-              {ticketDetail?.bookingDate
-                ? new Date(ticketDetail.bookingDate).toLocaleDateString("id-ID")
-                : "-"}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={styles.printButton}
-            onPress={() => setIsModalVisible(true)}
-          >
-            <Text style={styles.printButtonText}>Cetak Tiket</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 };
 

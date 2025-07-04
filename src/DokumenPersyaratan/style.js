@@ -4,40 +4,42 @@ const styles = StyleSheet.create({
   // --- STRUKTUR DASAR ---
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
+    backgroundColor: '#F4F6F8', 
   },
 
-  // --- HEADER BARU DENGAN IMAGEBACKGROUND ---
-  header: {
+  // --- STYLES UNTUK HEADER ---
+  headerWrapper: {
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 44,
+    paddingBottom: 10,
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 65,
-    position: 'relative',
+    height: 50,
+    paddingHorizontal: 10,
   },
-
-  backButton: {
-    position: 'absolute',
-    left: 10,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    padding: 5,
+  headerLeft: {
+    width: 40,
   },
-
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerRight: {
+    width: 40,
+  },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
   },
+  backButton: {
+    padding: 5,
+  },
+  // --- AKHIR STYLES HEADER ---
 
-  // --- KONTEN UTAMA ---
   contentBody: {
     flex: 1,
-    backgroundColor: '#F4F6F8',
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
     paddingHorizontal: 20,
     paddingTop: 25,
   },
@@ -86,6 +88,7 @@ const styles = StyleSheet.create({
     color: '#374151',
     fontWeight: '500',
     marginLeft: 15,
+    flex: 1, 
   },
 
   quantityText: {
@@ -93,15 +96,13 @@ const styles = StyleSheet.create({
     color: 'black',
   },
 
-  // --- FOOTER DAN TOMBOL ---
-  footerWrapper: {
+  footer: {
     backgroundColor: '#fff',
-  },
-
-  footerInner: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: Platform.OS === 'android' ? 40 : 30,
+    paddingTop: 15,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
   },
 
   submitButton: {
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
   },
 
   modalMessage: {
-    fontSize: 11,
+    fontSize: 14,
     color: '#6B7280',
     lineHeight: 20,
   },
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: '#E2B282',
+    backgroundColor: '#28A745',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
@@ -235,36 +236,13 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
-    alignSelf: 'center', 
-    paddingHorizontal: 22,  
-    minWidth: 130, 
+    alignSelf: 'stretch',
   },
 
   successButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
-  },
-
-  // --- SKELETON (OPSIONAL) ---
-  skeletonItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingHorizontal: 10,
-  },
-
-  skeletonIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    marginRight: 10,
-  },
-
-  skeletonText: {
-    width: 220,
-    height: 16,
-    borderRadius: 4,
   },
 });
 

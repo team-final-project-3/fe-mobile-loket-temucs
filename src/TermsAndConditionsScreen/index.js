@@ -9,6 +9,7 @@ import {
   StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as Animatable from "react-native-animatable"; // Import Animatable
 import styles from "./style";
 
 const headerBg = require("../../assets/images/header.png");
@@ -40,7 +41,13 @@ export default function TermsAndConditionsScreen({ navigation }) {
         <Text style={styles.headerTitle}>Syarat & Ketentuan</Text>
       </ImageBackground>
 
-      <View style={styles.contentBody}>
+      {/* --- PERUBAHAN --- Konten dibungkus dengan Animatable.View */}
+      <Animatable.View
+        style={styles.contentBody}
+        animation="fadeInUp"
+        duration={800}
+        delay={200}
+      >
         <ScrollView
           contentContainerStyle={styles.scrollViewContent}
           showsVerticalScrollIndicator={false}
@@ -93,7 +100,7 @@ export default function TermsAndConditionsScreen({ navigation }) {
             </Text>
           </View>
         </ScrollView>
-      </View>
+      </Animatable.View>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.agreeButton} onPress={handleAgree}>

@@ -9,25 +9,19 @@ import { COLORS } from "../Constant/colors";
 const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
+  // --- PERUBAHAN --- paddingTop dihapus dari container
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: Platform.OS === "android" ? RNStatusBar.currentHeight : 0,
+    backgroundColor: "#F4F6F8", // Warna background disamakan
   },
   scrollContainer: {
     paddingBottom: 20,
   },
-  header: {
-    height: 65,
-    justifyContent: "flex-end",
-    alignItems: "center",
-    paddingBottom: 10,
-  },
+  // Style header yang lama dihapus
   headerTitle: {
     fontSize: 22,
     fontWeight: "bold",
     color: "white",
-    top: "auto",
   },
   content: {
     paddingHorizontal: 20,
@@ -44,6 +38,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
+  // --- MODIFIKASI BAGIAN INI ---
   // STATUS BOX
   statusBoxContainer: {
     flexDirection: "row",
@@ -54,30 +49,39 @@ const styles = StyleSheet.create({
   statusBoxBlue: {
     flex: 1,
     borderWidth: 1.5,
-    borderColor: "#429EBD",
+    borderColor: "#A9A9A9", // Warna border biru
     borderRadius: 10,
     paddingVertical: 16,
     alignItems: "center",
-    backgroundColor: "#F0FAFF",
+    backgroundColor: "#FFFFFF", // Background diubah menjadi putih
   },
-  statusBoxOrange: {
+  // Diubah dari statusBoxOrange menjadi statusBoxGray agar lebih sesuai
+  statusBoxGray: {
     flex: 1,
     borderWidth: 1.5,
-    borderColor: COLORS.PRIMARY_ORANGE,
+    borderColor: '#A9A9A9', // Warna border abu-abu
     borderRadius: 10,
     paddingVertical: 16,
     alignItems: "center",
-    backgroundColor: "#FFF7F0",
+    backgroundColor: "#FFFFFF", // Background diubah menjadi putih
   },
   statusLabel: {
     fontSize: 14,
     color: "#666",
   },
   statusValue: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#053F5C",
+    // Warna spesifik dipindahkan ke style baru di bawah
   },
+  // Style baru untuk warna angka agar sesuai dengan border
+  statusValueBlue: {
+    color: '#666', // Warna angka biru
+  },
+  statusValueGray: {
+    color: '#666', // Warna angka abu-abu
+  },
+  // --- AKHIR MODIFIKASI ---
 
   // TICKET CARD
   ticketCard: {
@@ -94,38 +98,44 @@ const styles = StyleSheet.create({
   },
   branchText: {
     fontSize: 20,
-    color: COLORS.background,
+    color: "#FFFFFF",
     fontWeight: "600",
     marginBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.background,
+    borderBottomColor: "rgba(255, 255, 255, 0.3)",
     paddingBottom: 8,
     width: "100%",
     textAlign: "center",
   },
-  userGreeting: {
-    backgroundColor: "#fff",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    fontWeight: "600",
-    marginBottom: 10,
-    textAlign: "center",
-    color: "#053F5C",
+  // --- MODIFIKASI BAGIAN INI ---
+  // Style 'userGreeting' dipecah menjadi container dan text
+  userGreetingContainer: {
+    backgroundColor: '#fff',
+    paddingVertical: 3,
+    paddingHorizontal: 12,
+    marginBottom: 15,
+    width: '100%', // Memastikan lebar container penuh
   },
+  userGreetingText: {
+    fontWeight: '600',
+    textAlign: 'center',
+    color: '#053F5C',
+    fontSize: 16,
+  },
+  // --- AKHIR MODIFIKASI ---
   ticketLabel: {
     fontSize: 16,
-    color: COLORS.background,
+    color: "#FFFFFF",
   },
   ticketNumber: {
-    fontSize: 48,
+    fontSize: 44,
     fontWeight: "bold",
-    color: COLORS.background,
+    color: "#FFFFFF",
     marginVertical: 10,
   },
   dateText: {
     fontSize: 13,
-    color: COLORS.background,
+    color: "#FFFFFF",
   },
   printButton: {
     backgroundColor: "#28A745",
@@ -167,7 +177,8 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   successIconContainer: {
-    backgroundColor: "#E2B282",
+    // --- PERUBAHAN --- Warna disamakan dengan tombol print
+    backgroundColor: "#28A745",
     width: 90,
     height: 90,
     borderRadius: 45,
@@ -187,9 +198,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
-    alignSelf: "center",
-    paddingHorizontal: 12,
-    minWidth: 130,
+    alignSelf: "stretch", // Tombol dibuat full-width
   },
   modalHomeButtonText: {
     color: "#FFF",

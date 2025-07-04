@@ -142,7 +142,7 @@ export default function DashboardScreen({ navigation }) {
   };
 
   const renderFilterButton = () => {
-    let label = "Filter";
+    let label = "Status";
     let statusColor = "#999";
     let style = styles.filterButton;
 
@@ -177,20 +177,28 @@ export default function DashboardScreen({ navigation }) {
 
   const renderQueueItem = ({ item }) => (
     <View style={styles.tableRow}>
-      <Text style={[styles.tableCell, { flex: 2 }]}>{item.noTiket}</Text>
-      <Text style={[styles.tableCell, { flex: 3 }]} numberOfLines={1}>
-        {item.nama}
-      </Text>
-      <Text style={[styles.tableCell, { flex: 2 }]}>{item.status}</Text>
-      <Text style={[styles.tableCell, { flex: 1.5, textAlign: "right" }]}>
-        {item.waktu + ""}
-      </Text>
+      {/* Kolom No Tiket */}
+      <View style={styles.columnNoTiket}>
+        <Text style={styles.cellTextLeft} numberOfLines={2}>{item.noTiket}</Text>
+      </View>
+      {/* Kolom Nama */}
+      <View style={styles.columnNama}>
+        <Text style={styles.cellTextLeft} numberOfLines={1}>{item.nama}</Text>
+      </View>
+      {/* Kolom Status */}
+      <View style={styles.columnStatus}>
+        <Text style={styles.cellTextCenter}>{item.status}</Text>
+      </View>
+      {/* Kolom Waktu */}
+      <View style={styles.columnWaktu}>
+        <Text style={styles.cellTextRight}>{item.waktu}</Text>
+      </View>
     </View>
   );
 
   const renderSkeletonRow = (_, index) => (
     <View style={styles.tableRow} key={index}>
-      {[2, 3, 2, 1.5].map((flex, i) => (
+      {[2.5, 2.5, 2, 1.5].map((flex, i) => (
         <View
           key={i}
           style={{
@@ -206,25 +214,25 @@ export default function DashboardScreen({ navigation }) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.container}>
       <StatusBar
         barStyle="light-content"
-        backgroundColor="transparent"
         translucent
+        backgroundColor="transparent"
       />
-      <View
-        style={[
-          styles.header,
-          {
+
+      <ImageBackground
+        source={headerBg}
+        style={styles.header}
+        resizeMode="cover"
+      >
+        <View
+          style={{
             paddingTop:
               Platform.OS === "android" ? RNStatusBar.currentHeight : 44,
-          },
-        ]}
-      >
-        <ImageBackground
-          source={headerBg}
-          style={styles.headerImage}
-          resizeMode="cover"
+            paddingHorizontal: 20,
+            paddingBottom: 20,
+          }}
         >
           <View style={styles.headerTop}>
             <TouchableOpacity
@@ -240,11 +248,15 @@ export default function DashboardScreen({ navigation }) {
               <Text style={styles.dateText}>{formattedDate}</Text>
             </View>
           </View>
-        </ImageBackground>
-      </View>
+        </View>
+      </ImageBackground>
 
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View style={styles.contentWrapper}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.contentWrapper}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.currentQueueCard}>
             <Text style={styles.currentQueueTitle}>No antrean saat ini:</Text>
             <Text style={styles.currentQueueNumber}>{currentQueueNumber}</Text>
@@ -300,7 +312,7 @@ export default function DashboardScreen({ navigation }) {
                 />
                 <TextInput
                   style={styles.searchInput}
-                  placeholder="Cari nama atau no. tiket"
+                  placeholder="Cari antrean"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   placeholderTextColor="#888"
@@ -311,21 +323,22 @@ export default function DashboardScreen({ navigation }) {
 
             <View style={styles.tableContainer}>
               <View style={styles.tableHeader}>
-                <Text style={[styles.tableHeaderText, { flex: 2 }]}>
-                  No Tiket
-                </Text>
-                <Text style={[styles.tableHeaderText, { flex: 3 }]}>Nama</Text>
-                <Text style={[styles.tableHeaderText, { flex: 2 }]}>
-                  Status
-                </Text>
-                <Text
-                  style={[
-                    styles.tableHeaderText,
-                    { flex: 1.5, textAlign: "right" },
-                  ]}
-                >
-                  Waktu
-                </Text>
+                {/* Header No Tiket */}
+                <View style={styles.columnNoTiket}>
+                  <Text style={styles.headerTextLeft}>No Tiket</Text>
+                </View>
+                {/* Header Nama */}
+                <View style={styles.columnNama}>
+                  <Text style={styles.headerTextLeft}>Nama</Text>
+                </View>
+                {/* Header Status */}
+                <View style={styles.columnStatus}>
+                  <Text style={styles.headerTextCenter}>Status</Text>
+                </View>
+                {/* Header Waktu */}
+                <View style={styles.columnWaktu}>
+                  <Text style={styles.headerTextRight}>Waktu</Text>
+                </View>
               </View>
 
               {isLoading ? (
@@ -342,8 +355,8 @@ export default function DashboardScreen({ navigation }) {
               )}
             </View>
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }

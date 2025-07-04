@@ -21,7 +21,7 @@ const BRANCH_URL = "https://temucs-tzaoj.ondigitalocean.app/api/branch/loket";
 
 const getDistance = (lat1, lon1, lat2, lon2) => {
   const toRad = (value) => (value * Math.PI) / 180;
-  const R = 6371;
+  const R = 6371; // Radius bumi dalam km
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
@@ -40,7 +40,8 @@ export default function NearestBranchScreen({ navigation }) {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [userLocation, setUserLocation] = useState(null);
-  const [sortOption, setSortOption] = useState("asc");
+  
+  const [sortOption, setSortOption] = useState("asc"); // 'asc' untuk antrean terkecil, 'desc' untuk terbanyak
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedQuery(searchQuery), 300);
@@ -52,13 +53,7 @@ export default function NearestBranchScreen({ navigation }) {
   }, []);
 
   const toggleSortOption = () => {
-    const newOption = sortOption === "asc" ? "desc" : "asc";
-    setSortOption(newOption);
-
-    if (userLocation) {
-      setLoading(true);
-      fetchBranches(userLocation.latitude, userLocation.longitude, newOption);
-    }
+    setSortOption((prevOption) => (prevOption === "asc" ? "desc" : "asc"));
   };
 
   const getLocationAndFetchBranches = async () => {
@@ -69,6 +64,7 @@ export default function NearestBranchScreen({ navigation }) {
           "Izin Lokasi Ditolak",
           "Aktifkan izin lokasi untuk menghitung jarak."
         );
+        fetchBranches(null, null);
         return;
       }
 
@@ -76,13 +72,15 @@ export default function NearestBranchScreen({ navigation }) {
       const { latitude, longitude } = location.coords;
       setUserLocation({ latitude, longitude });
 
-      fetchBranches(latitude, longitude, sortOption);
+      fetchBranches(latitude, longitude);
     } catch (error) {
       console.error("Gagal mengambil lokasi:", error);
+      fetchBranches(null, null);
     }
   };
 
-  const fetchBranches = async (userLat, userLon, sort = "asc") => {
+  const fetchBranches = async (userLat, userLon) => {
+    setLoading(true);
     try {
       const token = await AsyncStorage.getItem("userToken");
       if (!token) throw new Error("Token tidak ditemukan");
@@ -104,7 +102,7 @@ export default function NearestBranchScreen({ navigation }) {
                 userLon,
                 branch.latitude,
                 branch.longitude
-              ).toFixed(2)
+              )
             : "-";
 
         return {
@@ -115,17 +113,19 @@ export default function NearestBranchScreen({ navigation }) {
           longitude: branch.longitude,
           isOpen: branch.status,
           queue: branch.activeQueueCount ?? 0,
-          distance: distance,
+          distance: distance === "-" ? "-" : parseFloat(distance.toFixed(2)),
         };
       });
 
-      if (sort === "asc") {
-        branchesWithQueue.sort((a, b) => a.queue - b.queue);
-      } else {
-        branchesWithQueue.sort((a, b) => b.queue - a.queue);
-      }
+      // Filter cabang yang jaraknya di bawah atau sama dengan 10 km
+      const branchesWithin10km = branchesWithQueue.filter((branch) => {
+        if (branch.distance === "-") {
+            return true;
+        }
+        return branch.distance <= 10;
+      });
 
-      setBranches(branchesWithQueue);
+      setBranches(branchesWithin10km);
     } catch (error) {
       console.error("Error fetching branches:", error);
     } finally {
@@ -133,13 +133,28 @@ export default function NearestBranchScreen({ navigation }) {
     }
   };
 
+  // ======================= PERUBAHAN UTAMA DI SINI =======================
+  // Memo untuk sorting data berdasarkan JUMLAH ANTREN
+  const sortedBranches = useMemo(() => {
+    const sortableBranches = [...branches]; // Salin array agar tidak mengubah state asli
+
+    sortableBranches.sort((a, b) => {
+      // 'asc' = antrean terkecil, 'desc' = antrean terbanyak
+      return sortOption === "asc" ? a.queue - b.queue : b.queue - a.queue;
+    });
+
+    return sortableBranches;
+  }, [branches, sortOption]);
+  // =====================================================================
+
+  // Filter berdasarkan hasil pencarian dari data yang SUDAH diurutkan
   const filteredBranches = useMemo(() => {
-    return branches.filter(
+    return sortedBranches.filter(
       (item) =>
         item.name.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
         item.address.toLowerCase().includes(debouncedQuery.toLowerCase())
     );
-  }, [branches, debouncedQuery]);
+  }, [sortedBranches, debouncedQuery]);
 
   const renderBranchCard = ({ item }) => (
     <View style={styles.card}>
@@ -237,6 +252,7 @@ export default function NearestBranchScreen({ navigation }) {
             />
           </View>
 
+          {/* PERUBAHAN Teks Tombol */}
           <TouchableOpacity
             style={styles.sortButton}
             onPress={toggleSortOption}
@@ -248,7 +264,9 @@ export default function NearestBranchScreen({ navigation }) {
               size={18}
               color="#333"
             />
-            <Text style={styles.sortButtonText}>Sort by</Text>
+            <Text style={styles.sortButtonText}>
+              {sortOption === "asc" ? "Terkecil" : "Terbanyak"}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -275,7 +293,7 @@ export default function NearestBranchScreen({ navigation }) {
               <View style={{ alignItems: "center", marginTop: 40 }}>
                 <Ionicons name="alert-circle-outline" size={48} color="#ccc" />
                 <Text style={{ color: "#888", marginTop: 10 }}>
-                  Cabang tidak ditemukan
+                  Tidak ada cabang ditemukan dalam radius 10 km
                 </Text>
               </View>
             }

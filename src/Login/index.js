@@ -88,7 +88,6 @@ export default function LoginScreen({ onLoginSuccess }) {
           loket?.branch?.address ?? ""
         );
 
-        // ✅ Log tunggal untuk message dan token
         console.log(`[LOGIN SUCCESS] ${data.message} | Token: ${data.token}`);
 
         onLoginSuccess();
@@ -124,7 +123,11 @@ export default function LoginScreen({ onLoginSuccess }) {
       style={styles.container}
       resizeMode="cover"
     >
-      <StatusBar barStyle="light-content" />
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
       <View style={styles.bgOverlay} />
       <SafeAreaView style={{ flex: 1 }}>
         <KeyboardAvoidingView
@@ -166,9 +169,12 @@ export default function LoginScreen({ onLoginSuccess }) {
                       placeholder="Masukkan username Anda"
                       placeholderTextColor="#A0AEC0"
                       onChangeText={(text) => {
-                        const cleaned = text
+                        const withoutEmoji = text.replace(/[^\w\s.-]/g, '');
+
+                        const cleaned = withoutEmoji
                           .replace(/^\s+|\s+$/g, "")
                           .replace(/\s{2,}/g, " ");
+                        
                         setUsername(cleaned);
                         setUsernameError("");
                         setPasswordError("");
@@ -199,9 +205,13 @@ export default function LoginScreen({ onLoginSuccess }) {
                       placeholder="Masukkan kata sandi"
                       placeholderTextColor="#A0AEC0"
                       onChangeText={(text) => {
-                        setPassword(text.replace(/\s/g, ""));
+                        // --- MODIFIKASI DIMULAI DI SINI ---
+                        // Menghapus karakter non-ASCII (termasuk emoji) dan juga spasi
+                        const cleanedText = text.replace(/[^\x20-\x7E]/g, '');
+                        setPassword(cleanedText);
                         setUsernameError("");
                         setPasswordError("");
+                        // --- AKHIR MODIFIKASI ---
                       }}
                       value={password}
                       secureTextEntry={!isPasswordVisible}

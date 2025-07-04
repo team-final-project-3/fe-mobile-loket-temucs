@@ -21,25 +21,30 @@ const styles = StyleSheet.create({
   headerTop: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 15,
+    paddingHorizontal: 0,
     marginTop: 15,
   },
   profileIcon: {
-    marginRight: 10,
+    marginRight: 5,
+    marginLeft: 0,
   },
   headerTextContainer: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "flex-start",
+    marginLeft: 0,
   },
   welcomeText: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#FFFFFF",
+    textAlign: "left",
   },
   dateText: {
     fontSize: 11,
     color: "#FFFFFF",
     opacity: 0.9,
+    textAlign: "left",
   },
   currentQueueCard: {
     backgroundColor: '#053F5C',
@@ -59,7 +64,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   currentQueueNumber: {
-    fontSize: 56,
+    fontSize: 43,
     fontWeight: 'bold',
     color: 'white',
     marginVertical: 10,
@@ -71,14 +76,14 @@ const styles = StyleSheet.create({
   },
   refreshButton: {
     flexDirection: 'row',
-    backgroundColor: '#DC3545',
+    backgroundColor: '#3B82F6',
     borderRadius: 12,
     paddingVertical: 16,
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1,
     marginRight: 8,
-    shadowColor: '#DC3545',
+    shadowColor: '#3B82F6',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -167,7 +172,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 4,
     paddingRight: 10,
     fontSize: 14,
     color: '#1F2937',
@@ -199,32 +204,81 @@ const styles = StyleSheet.create({
   },
   tableContainer: {
     backgroundColor: 'white',
-    paddingHorizontal: 15,
+    paddingBottom: 10,
   },
   tableHeader: {
     flexDirection: 'row',
-    paddingBottom: 10,
-    paddingTop: 15,
-    borderBottomWidth: 2,
-    borderBottomColor: '#F3F4F6',
-  },
-  tableHeaderText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#6B7280',
-    textTransform: 'uppercase',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#F9FAFB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
-  tableCell: {
-    fontSize: 14,
-    color: '#374151',
+  
+  // Style untuk Kolom (mengatur lebar/flex)
+  columnNoTiket: {
+    flex: 2.5,
+    paddingRight: 5,
   },
+  columnNama: {
+    flex: 2.5,
+    paddingHorizontal: 5,
+  },
+  columnStatus: {
+    flex: 2,
+    paddingHorizontal: 5,
+  },
+  columnWaktu: {
+    flex: 1.5,
+    paddingLeft: 5,
+  },
+
+  // Style untuk Teks di Header (mengatur perataan & font)
+  headerTextLeft: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#6B7280',
+    textAlign: 'left',
+  },
+  headerTextCenter: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  headerTextRight: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#6B7280',
+    textAlign: 'right',
+  },
+
+  // Style untuk Teks di Sel (mengatur perataan & font)
+  cellTextLeft: {
+    fontSize: 14,
+    color: '#1F2937',
+    textAlign: 'left',
+  },
+  cellTextCenter: {
+    fontSize: 14,
+    color: '#1F2937',
+    textAlign: 'center',
+  },
+  cellTextRight: {
+    fontSize: 14,
+    color: '#1F2937',
+    textAlign: 'right',
+  },
+
   emptyListText: {
     textAlign: 'center',
     paddingVertical: 40,

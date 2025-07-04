@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  SafeAreaView,
   StatusBar,
   TouchableOpacity,
   TextInput,
@@ -12,6 +11,8 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
+  StatusBar as RNStatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -19,14 +20,11 @@ import base64 from "base-64";
 import styles from "./style";
 import { COLORS } from "../Constant/colors";
 
+const API_URL = "https://temucs-tzaoj.ondigitalocean.app";
 const headerBg = require("../../assets/images/header.png");
 
 const InputError = ({ error }) =>
-  error ? (
-    <Text style={{ color: COLORS.ERROR || "red", fontSize: 12, marginTop: 4 }}>
-      {error}
-    </Text>
-  ) : null;
+  error ? <Text style={styles.errorText}>{error}</Text> : null;
 
 const AmbilAntreanScreen = ({ navigation }) => {
   const [namaLengkap, setNamaLengkap] = useState("");
@@ -47,89 +45,93 @@ const AmbilAntreanScreen = ({ navigation }) => {
     const fetchProfileData = async () => {
       try {
         const token = await AsyncStorage.getItem("userToken");
-        if (!token) return setLoadingProfile(false);
+        if (!token) {
+          Alert.alert("Autentikasi Gagal", "Sesi Anda berakhir, silakan login kembali.", [
+            { text: "OK", onPress: () => navigation.goBack() },
+          ]);
+          return;
+        }
 
         const decoded = JSON.parse(base64.decode(token.split(".")[1]));
         const loketId = decoded?.loketId;
-        if (!loketId) return setLoadingProfile(false);
+        if (!loketId) {
+          Alert.alert("Error", "ID Loket tidak valid.", [
+            { text: "OK", onPress: () => navigation.goBack() },
+          ]);
+          return;
+        }
 
         const headers = { Authorization: `Bearer ${token}` };
 
-        const profileRes = await fetch(
-          `https://temucs-tzaoj.ondigitalocean.app/api/loket/${loketId}/profile`,
-          { headers }
-        );
-        const profileData = await profileRes.json();
-        if (!profileRes.ok) return setLoadingProfile(false);
+        const [profileRes, inProgressRes, countRes] = await Promise.all([
+            fetch(`${API_URL}/api/loket/${loketId}/profile`, { headers }),
+            fetch(`${API_URL}/api/queue/inprogress/loket`, { headers }),
+            fetch(`${API_URL}/api/queue/count/loket`, { headers })
+        ]);
 
-        setBranchName(profileData?.loket?.name || "Nama Cabang");
-        setBranchAddress(
-          profileData?.loket?.branch?.address || "Alamat belum tersedia"
-        );
+        if (profileRes.ok) {
+            const profileData = await profileRes.json();
+            setBranchName(profileData?.loket?.name || "Nama Cabang");
+            setBranchAddress(profileData?.loket?.branch?.address || "Alamat belum tersedia");
+        }
 
-        const inProgressRes = await fetch(
-          `https://temucs-tzaoj.ondigitalocean.app/api/queue/inprogress/loket`,
-          { headers }
-        );
         if (inProgressRes.status === 404) {
           setLastInProgressTicket("-");
-        } else {
+        } else if (inProgressRes.ok) {
           const inProgressData = await inProgressRes.json();
           setLastInProgressTicket(inProgressData?.ticketNumber || "-");
         }
 
-        const countRes = await fetch(
-          `https://temucs-tzaoj.ondigitalocean.app/api/queue/count/loket`,
-          { headers }
-        );
-        const countData = await countRes.json();
-        setTotalQueue(countData?.totalQueue ?? "-");
+        if (countRes.ok) {
+            const countData = await countRes.json();
+            setTotalQueue(countData?.totalQueue ?? "-");
+        }
+
       } catch (error) {
-        Alert.alert("Error", "Gagal memuat data.");
+        console.error("Fetch Profile Error:", error);
+        Alert.alert("Error", "Gagal memuat data dari server.");
       } finally {
         setLoadingProfile(false);
       }
     };
 
     fetchProfileData();
-  }, []);
+  }, [navigation]);
 
-  const validateName = (name) => {
-    if (!name.trim()) return "Nama lengkap tidak boleh kosong.";
-    return "";
-  };
+  const validateInput = () => {
+    setNamaError("");
+    setEmailError("");
+    setPhoneError("");
+    let isValid = true;
 
-  const validateEmail = (email, noTelp) => {
-    const trimmedEmail = email.trim();
-    const trimmedNoTelp = noTelp.trim();
-
-    if (!trimmedEmail && !trimmedNoTelp)
-      return "Email atau No Telepon wajib diisi";
-
-    if (trimmedEmail) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(trimmedEmail)) return "Format email tidak valid";
+    if (!namaLengkap.trim()) {
+        setNamaError("Nama lengkap tidak boleh kosong.");
+        isValid = false;
     }
 
-    return "";
-  };
+    const emailVal = email.trim();
+    const phoneVal = noTelepon.trim();
 
-  const validatePhone = (phone) => {
-    if (!/^\d+$/.test(phone)) return "";
-    if (phone.length < 8 || phone.length > 15) return "";
-    return "";
+    if (!emailVal && !phoneVal) {
+        setEmailError("Email atau No Telepon wajib diisi.");
+        setPhoneError("Email atau No Telepon wajib diisi.");
+        isValid = false;
+    } else {
+        if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+            setEmailError('Format email tidak valid.');
+            isValid = false;
+        }
+        if (phoneVal && (phoneVal.length < 8 || phoneVal.length > 15)) {
+            setPhoneError("No Telepon harus antara 8-15 digit.");
+            isValid = false;
+        }
+    }
+
+    return isValid;
   };
 
   const handleAmbilAntrean = () => {
-    const nameErr = validateName(namaLengkap);
-    const emailErr = validateEmail(email, noTelepon);
-    const phoneErr = validatePhone(noTelepon);
-
-    setNamaError(nameErr);
-    setEmailError(emailErr);
-    setPhoneError(phoneErr);
-
-    if (nameErr || emailErr || phoneErr) return;
+    if (!validateInput()) return;
 
     navigation.navigate("LayananAntrean", {
       namaLengkap: namaLengkap.trim(),
@@ -140,141 +142,145 @@ const AmbilAntreanScreen = ({ navigation }) => {
 
   if (loadingProfile) {
     return (
-      <SafeAreaView
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <ActivityIndicator size="large" color={COLORS.PRIMARY_ORANGE} />
-      </SafeAreaView>
+      <View style={[ styles.container, { justifyContent: "center", alignItems: "center" }]} >
+        <ActivityIndicator size="large" color={COLORS.PRIMARY_ORANGE || '#F27F0C'} />
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
-      />
-      <ImageBackground
-        source={headerBg}
-        style={styles.header}
-        resizeMode="cover"
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+      <ImageBackground source={headerBg} style={{ width: "100%" }} resizeMode="cover">
+        <View
+          style={{
+            paddingTop: Platform.OS === "android" ? RNStatusBar.currentHeight : 44,
+            paddingBottom: 10,
+          }}
         >
-          <Ionicons name="chevron-back-outline" size={30} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Ambil Antrean</Text>
+          <View style={{
+            flexDirection: "row",
+            alignItems: "center",
+            height: 50,
+            paddingHorizontal: 10,
+          }}>
+            <View style={{ width: 40 }}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={{ padding: 5 }}
+              >
+                <Ionicons name="chevron-back-outline" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Text style={styles.headerTitle}>Ambil Antrean</Text>
+            </View>
+
+            <View style={{ width: 40 }} />
+          </View>
+        </View>
       </ImageBackground>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          <View style={styles.contentWrapper}>
-            <View style={styles.branchInfoCard}>
-              <Text style={styles.branchName}>{branchName}</Text>
-              <Text style={styles.branchAddress}>{branchAddress}</Text>
+        <SafeAreaView style={{ flex: 1 }}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.contentWrapper}>
+              <View style={styles.branchInfoCard}>
+                <Text style={styles.branchName}>{branchName}</Text>
+                <Text style={styles.branchAddress}>{branchAddress}</Text>
+              </View>
+
+              <View style={styles.queueStatsContainer}>
+                <View style={[styles.statBox, styles.borderServed]}>
+                  <Text style={styles.statLabel}>Sedang Dilayani</Text>
+                  <Text style={[styles.statValue, styles.valueServed]}>{lastInProgressTicket}</Text>
+                </View>
+                <View style={[styles.statBox, styles.borderTotal]}>
+                  <Text style={styles.statLabel}>Total Antrean</Text>
+                  <Text style={[styles.statValue, styles.valueTotal]}>{totalQueue}</Text>
+                </View>
+              </View>
+
+              <View style={styles.formContainer}>
+                <Text style={styles.formTitle}>DATA NASABAH</Text>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Nama Lengkap *</Text>
+                  <TextInput
+                    style={[styles.input, namaError ? styles.inputError : null]}
+                    value={namaLengkap}
+                    onChangeText={(text) => {
+                      const cleaned = text.replace(/[^a-zA-Z\s.,']/g, '');
+                      setNamaLengkap(cleaned);
+                      if (namaError) setNamaError("");
+                    }}
+                    placeholder="Masukkan nama lengkap Anda"
+                    placeholderTextColor="#999"
+                  />
+                  <InputError error={namaError} />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Email</Text>
+                  <TextInput
+                    style={[styles.input, emailError ? styles.inputError : null]}
+                    value={email}
+                    onChangeText={(text) => {
+                      // --- MODIFIKASI DIMULAI DI SINI ---
+                      // Menghapus karakter non-ASCII (termasuk emoji) dan semua spasi
+                      const cleaned = text.replace(/[^\x20-\x7E]/g, '').replace(/\s/g, '');
+                      setEmail(cleaned);
+                      if(emailError) setEmailError("");
+                      if(phoneError) setPhoneError("");
+                      // --- AKHIR MODIFIKASI ---
+                    }}
+                    placeholder="contoh: email@domain.com"
+                    placeholderTextColor="#999"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  <InputError error={emailError} />
+                </View>
+
+                <View style={styles.dividerContainer}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>Atau</Text>
+                  <View style={styles.dividerLine} />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>No Telepon</Text>
+                  <TextInput
+                    style={[styles.input, phoneError ? styles.inputError : null]}
+                    value={noTelepon}
+                    onChangeText={(text) => {
+                      const cleaned = text.replace(/[^0-9]/g, "");
+                      setNoTelepon(cleaned);
+                      if(phoneError) setPhoneError("");
+                      if(emailError) setEmailError("");
+                    }}
+                    placeholder="Masukkan No Telepon Anda"
+                    placeholderTextColor="#999"
+                    keyboardType="number-pad"
+                    maxLength={15}
+                  />
+                  <InputError error={phoneError} />
+                </View>
+              </View>
+            </ScrollView>
+            
+            <View style={styles.footer}>
+              <TouchableOpacity style={styles.submitButton} onPress={handleAmbilAntrean}>
+                <Text style={styles.submitButtonText}>Lanjutkan</Text>
+              </TouchableOpacity>
             </View>
-
-            <View style={styles.queueStatsContainer}>
-              <View style={[styles.statBox, styles.borderServed]}>
-                <Text style={[styles.statLabel, { textTransform: "none" }]}>
-                  Sedang Dilayani
-                </Text>
-                <Text style={[styles.statValue, styles.valueServed]}>
-                  {lastInProgressTicket}
-                </Text>
-              </View>
-              <View style={[styles.statBox, styles.borderTotal]}>
-                <Text style={[styles.statLabel, { textTransform: "none" }]}>
-                  Total Antrean
-                </Text>
-                <Text style={[styles.statValue, styles.valueTotal]}>
-                  {totalQueue}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.formContainer}>
-              <Text style={styles.formTitle}>DATA NASABAH</Text>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Nama Lengkap *</Text>
-                <TextInput
-                  style={[styles.input, namaError ? styles.inputError : null]}
-                  value={namaLengkap}
-                  onChangeText={(text) => {
-                    setNamaLengkap(text);
-                    if (namaError) setNamaError("");
-                  }}
-                  placeholder="Masukkan nama lengkap Anda"
-                  placeholderTextColor="#999"
-                />
-                <InputError error={namaError} />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Email</Text>
-                <TextInput
-                  style={[styles.input, emailError ? styles.inputError : null]}
-                  value={email}
-                  onChangeText={(text) => {
-                    setEmail(text);
-                    if (emailError) setEmailError("");
-                  }}
-                  placeholder="Masukkan email Anda"
-                  placeholderTextColor="#999"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                <InputError error={emailError} />
-              </View>
-
-              <View style={styles.dividerContainer}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>Atau</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>No Telepon *</Text>
-                <TextInput
-                  style={[styles.input, phoneError ? styles.inputError : null]}
-                  value={noTelepon}
-                  onChangeText={(text) => {
-                    const cleaned = text.replace(/[^0-9]/g, "");
-                    setNoTelepon(cleaned);
-                    if (phoneError) setPhoneError("");
-                  }}
-                  placeholder="Masukkan No Telepon Anda"
-                  placeholderTextColor="#999"
-                  keyboardType="number-pad"
-                  maxLength={15}
-                />
-                <InputError error={phoneError} />
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleAmbilAntrean}
-            >
-              <Text style={styles.submitButtonText}>Lanjutkan</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+        </SafeAreaView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 

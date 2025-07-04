@@ -4,32 +4,44 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F0F2F5',
-    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
   },
-  header: {
+
+  // --- STYLES UNTUK HEADER ---
+  headerWrapper: {
+    // Memberi padding atas untuk menghindari status bar sistem
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight : 44,
+    paddingBottom: 10,
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 15,
-    height: 65,
-    position: 'relative',
+    height: 50, // Tinggi tetap agar stabil
+    paddingHorizontal: 10,
   },
-  backButton: {
-    position: 'absolute',
-    left: 10,
-    top: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    padding: 5,
+  headerLeft: {
+    width: 40, // Kolom kiri untuk tombol kembali
+  },
+  headerCenter: {
+    flex: 1, // Kolom tengah untuk judul, mengisi sisa ruang
+    alignItems: 'center',
+  },
+  headerRight: {
+    width: 40, // Kolom kanan sebagai spacer agar judul presisi di tengah
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
   },
+  backButton: {
+    padding: 5,
+  },
+  // --- AKHIR STYLES HEADER ---
+
   contentWrapper: {
-    padding: 15,
-    paddingBottom: 20,
+    paddingHorizontal: 15,
+    paddingTop: 15,
+    flexGrow: 1, 
   },
   branchInfoCard: {
     marginBottom: 20,
@@ -46,7 +58,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 16,
   },
-  queueStatsContainer: {
+    queueStatsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 25,
@@ -67,7 +79,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   borderServed: {
-    borderColor: '#429EBD',
+    borderColor: '#A9A9A9',
   },
   borderTotal: {
     borderColor: '#A9A9A9',
@@ -78,12 +90,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   statValue: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     marginTop: 5,
   },
   valueServed: {
-    color: '#429EBD',
+    color: '#666',
   },
   valueTotal: {
     color: '#666',
@@ -92,7 +104,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FBA44E',
     borderRadius: 12,
     padding: 15,
-    marginBottom: 10,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
@@ -103,17 +115,17 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 15,
     textAlign: 'center',
     textTransform: 'uppercase',
   },
   inputGroup: {
-    marginBottom: 10,
+    marginBottom: 12,
   },
   inputLabel: {
     color: '#FFFFFF',
     fontSize: 14,
-    marginBottom: 8,
+    marginBottom: 6,
     fontWeight: '600',
   },
   input: {
@@ -127,17 +139,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   inputError: {
-    borderColor: 'red',
+    borderColor: '#D32F2F',
+  },
+  errorText: {
+    color: '#D32F2F',
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: '500',
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 15,
+    marginVertical: 10,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   dividerText: {
     color: '#FFFFFF',
@@ -145,27 +163,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  phoneInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F7F7F7',
-    borderWidth: 1,
-    borderColor: '#EAEAEA',
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  phoneInput: {
-    flex: 1,
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
-    borderLeftWidth: 0,
+  footer: {
+    paddingHorizontal: 15,
+    paddingTop: 10,
+    paddingBottom: Platform.OS === 'android' ? 20 : 15,
+    backgroundColor: '#F0F2F5',
   },
   submitButton: {
     backgroundColor: '#28A745',
-    paddingVertical: 12,
+    paddingVertical: 15,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 8,
     shadowColor: '#28A745',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,

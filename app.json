@@ -1,32 +1,26 @@
 {
-  "name": "temu-cs",
-  "version": "1.0.0",
-  "main": "expo-router/entry",
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "dependencies": {
-    // ... daftar dependensi Anda akan ada di sini ...
-    "expo": "~51.0.8",
-    "react": "18.2.0",
-    "react-native": "0.74.1"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.20.0"
-  },
-  "private": true,
-  // INI BAGIAN YANG PERLU ANDA TAMBAH/EDIT
   "expo": {
-    "doctor": {
-      "reactNativeDirectoryCheck": {
-        "exclude": [
-          "jwt-decode",
-          "base-64",
-          "moment"
-        ]
+    "name": "TemuCS(Branch)",
+    "slug": "TemuCS",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "sdkVersion": "53.0.0",
+    "platforms": [
+      "android",
+      "ios"
+    ],
+    "android": {
+      "package": "com.sltnaccel.TemuCS",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "splash": {},
+    "extra": {
+      "eas": {
+        "projectId": "bbaeac85-4a2e-41a2-bc78-7fa5803b2d73"
       }
     }
   }

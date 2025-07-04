@@ -10,6 +10,7 @@ import {
   ScrollView,
   Modal,
   Alert,
+  Platform,
 } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -25,6 +26,8 @@ const ProfileScreen = ({ navigation, onLogout }) => {
   const [branchAddress, setBranchAddress] = useState("Memuat...");
   const [loading, setLoading] = useState(true);
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+  // --- PERUBAHAN --- State baru untuk loading saat logout
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const fetchProfileData = async () => {
     setLoading(true);
@@ -72,21 +75,29 @@ const ProfileScreen = ({ navigation, onLogout }) => {
     }
   };
 
+  // --- PERUBAHAN --- Logika handleLogout diperbarui
   const handleLogout = async () => {
+    setIsLoggingOut(true); // Mulai loading
     try {
       await AsyncStorage.removeItem("userToken");
-      if (onLogout) {
-        onLogout(); // keluar dari aplikasi
-      } else {
-        navigation.replace("Login"); // fallback jika onLogout tidak tersedia
-      }
+      // Memberi sedikit jeda agar loading terlihat
+      setTimeout(() => {
+        if (onLogout) {
+          onLogout(); // keluar dari aplikasi
+        } else {
+          navigation.replace("Login"); // fallback jika onLogout tidak tersedia
+        }
+      }, 500); // Jeda 500ms
     } catch (error) {
       Alert.alert("Logout Gagal", "Terjadi kesalahan saat logout.");
       console.error("Logout error:", error);
+      setIsLoggingOut(false); // Hentikan loading jika gagal
     }
+    // Tidak perlu setIsLoggingOut(false) di sini karena komponen akan di-unmount
   };
 
   useEffect(() => {
+    // Menggunakan 'if (onLogout)' untuk memastikan listener hanya ditambahkan jika prop ada
     if (onLogout) {
       const unsubscribe = navigation.addListener("focus", fetchProfileData);
       return unsubscribe;
@@ -139,14 +150,21 @@ const ProfileScreen = ({ navigation, onLogout }) => {
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setLogoutModalVisible(false)}
+                disabled={isLoggingOut} // Disable tombol batal saat proses logout
               >
                 <Text style={styles.cancelButtonText}>Batal</Text>
               </TouchableOpacity>
+              {/* --- PERUBAHAN --- Tombol Logout diperbarui */}
               <TouchableOpacity
                 style={[styles.modalButton, styles.logoutModalButton]}
                 onPress={handleLogout}
+                disabled={isLoggingOut} // Disable tombol saat proses logout
               >
-                <Text style={styles.logoutModalButtonText}>Logout</Text>
+                {isLoggingOut ? (
+                  <ActivityIndicator size="small" color="white" />
+                ) : (
+                  <Text style={styles.logoutModalButtonText}>Keluar</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -220,7 +238,7 @@ const ProfileScreen = ({ navigation, onLogout }) => {
             color="white"
             style={{ marginRight: 8 }}
           />
-          <Text style={styles.logoutBottomButtonText}>Logout</Text>
+          <Text style={styles.logoutBottomButtonText}>Keluar</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

@@ -19,33 +19,33 @@ import base64 from "base-64";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import styles from "./style";
 
+const API_URL = "https://temucs-tzaoj.ondigitalocean.app";
 const headerBg = require("../../assets/images/header.png");
 
 const DokumenPersyaratanScreen = ({ navigation, route }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isBooking, setIsBooking] = useState(false);
-  const { selectedServices, namaLengkap, email, noTelepon } =
-    route.params || {};
+  const { selectedServices, namaLengkap, email, noTelepon } = route.params || {};
   const queueIdRef = useRef(null);
 
   useEffect(() => {
     const fetchDocuments = async () => {
       if (!selectedServices || selectedServices.length === 0) {
         setDocuments([]);
+        setLoading(false);
         return;
       }
-      setLoading(true);
+      
       try {
         const serviceIds = selectedServices.map((service) => service.id);
         const token = await AsyncStorage.getItem("userToken");
-        if (!token)
-          throw new Error("Token tidak ditemukan. Silakan login kembali.");
+        if (!token) throw new Error("Token tidak ditemukan. Silakan login kembali.");
 
         const response = await fetch(
-          "https://temucs-tzaoj.ondigitalocean.app/api/documents/by-services/loket",
+          `${API_URL}/api/documents/by-services/loket`,
           {
             method: "POST",
             headers: {
@@ -58,9 +58,7 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(
-            `Gagal mengambil dokumen: ${response.status} ${errorText}`
-          );
+          throw new Error(`Gagal mengambil dokumen: ${response.status} ${errorText}`);
         }
 
         const data = await response.json();
@@ -95,8 +93,7 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
       const loketId = decoded?.loketId;
       const branchId = decoded?.branchId;
 
-      if (!loketId || !branchId)
-        throw new Error("ID Loket atau Branch tidak ditemukan di token.");
+      if (!loketId || !branchId) throw new Error("ID Loket atau Branch tidak ditemukan di token.");
 
       const serviceIds = selectedServices.map((service) => service.id);
 
@@ -109,8 +106,11 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
         phoneNumber: noTelepon || undefined,
       };
 
+      // --- LOG UNTUK MELIHAT PAYLOAD YANG DIKIRIM ---
+      console.log("Mengirim Payload Antrean:", JSON.stringify(payload, null, 2));
+
       const response = await fetch(
-        "https://temucs-tzaoj.ondigitalocean.app/api/queue/book-offline",
+        `${API_URL}/api/queue/book-offline`,
         {
           method: "POST",
           headers: {
@@ -122,13 +122,15 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
       );
 
       const responseJson = await response.json();
-      console.log("📥 RESPONSE AMBIL ANTREAN:", responseJson);
 
       if (!response.ok) {
-        throw new Error(
-          responseJson.message || "Terjadi kesalahan saat membuat antrean."
-        );
+        // --- LOG JIKA TERJADI ERROR DARI SERVER ---
+        console.error("Respon Error dari Server:", JSON.stringify(responseJson, null, 2));
+        throw new Error(responseJson.message || "Terjadi kesalahan saat membuat antrean.");
       }
+
+      // --- LOG UNTUK MELIHAT RESPON SUKSES DARI SERVER ---
+      console.log("Respon Sukses dari Server:", JSON.stringify(responseJson, null, 2));
 
       queueIdRef.current = responseJson.queue.id || null;
       setShowSuccessModal(true);
@@ -141,10 +143,10 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
 
   const handleLihatTiket = () => {
     setShowSuccessModal(false);
-    navigation.popToTop();
+    navigation.popToTop(); 
     navigation.navigate("Ticket", {
       queueId: queueIdRef.current,
-      namaLengkap: namaLengkap, // penting agar nama ditampilkan di Ticket
+      namaLengkap: namaLengkap,
     });
   };
 
@@ -161,27 +163,72 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
-      />
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 
-      {/* Header */}
-      <ImageBackground
-        source={headerBg}
-        style={styles.header}
-        resizeMode="cover"
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Ionicons name="chevron-back-outline" size={30} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Konfirmasi Layanan</Text>
+      <ImageBackground source={headerBg} style={{ width: "100%" }} resizeMode="cover">
+        <View style={styles.headerWrapper}>
+          <View style={styles.headerContent}>
+            <View style={styles.headerLeft}>
+              <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+              >
+                <Ionicons name="chevron-back-outline" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.headerCenter}>
+              <Text style={styles.headerTitle}>Konfirmasi Layanan</Text>
+            </View>
+            <View style={styles.headerRight} />
+          </View>
+        </View>
       </ImageBackground>
+
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentBody}>
+            <Text style={styles.mainTitle}>Dokumen Persyaratan</Text>
+            <Text style={styles.infoText}>
+              Untuk mempercepat proses layanan, mohon siapkan dokumen-dokumen berikut ini.
+            </Text>
+
+            <View style={styles.card}>
+              {loading ? (
+                <ActivityIndicator size="large" color="#E38E39" style={{ marginVertical: 40 }} />
+              ) : documents.length === 0 ? (
+                <Text style={styles.noDocumentText}>
+                  Tidak ada dokumen persyaratan khusus untuk layanan yang Anda pilih.
+                </Text>
+              ) : (
+                documents.map((doc, index) => (
+                  <View key={doc.id} style={[styles.documentItem, index === documents.length - 1 && { borderBottomWidth: 0 }]}>
+                    <Ionicons name="checkmark-circle" size={22} color="#28A745" />
+                    <Text style={styles.documentText}>
+                      {doc.name}
+                      {doc.count > 1 && <Text style={styles.quantityText}> x{doc.count}</Text>}
+                    </Text>
+                  </View>
+                ))
+              )}
+            </View>
+          </ScrollView>
+        </View>
+
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[styles.submitButton, isBooking && styles.submitButtonDisabled]}
+            onPress={handleAmbilAntreanPress}
+            disabled={isBooking}
+          >
+            {isBooking ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.submitButtonText}>Ambil Antrean</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
 
       {/* Modal Konfirmasi */}
       <Modal
@@ -198,9 +245,7 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
               </View>
               <View style={styles.modalTextContainer}>
                 <Text style={styles.modalTitle}>Apakah Anda Yakin?</Text>
-                <Text style={styles.modalMessage}>
-                  Anda akan menyetujui pembuatan antrean
-                </Text>
+                <Text style={styles.modalMessage}>Anda akan menyetujui pembuatan antrian</Text>
               </View>
             </View>
             <View style={styles.modalButtonContainer}>
@@ -215,11 +260,7 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
                 onPress={handleConfirmAmbilAntrean}
                 disabled={isBooking}
               >
-                {isBooking ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.confirmButtonText}>Lanjutkan</Text>
-                )}
+                {isBooking ? <ActivityIndicator color="#fff" /> : <Text style={styles.confirmButtonText}>Lanjutkan</Text>}
               </TouchableOpacity>
             </View>
           </View>
@@ -237,85 +278,17 @@ const DokumenPersyaratanScreen = ({ navigation, route }) => {
           <View style={styles.modalContainer}>
             <View style={{ alignItems: "center", marginBottom: 20 }}>
               <View style={styles.successIconWrapper}>
-                <MaterialCommunityIcons
-                  name="emoticon-happy"
-                  size={56}
-                  color={"white"}
-                />
+                <MaterialCommunityIcons name="check-bold" size={40} color={"white"} />
               </View>
               <Text style={styles.successTitle}>Antrean Berhasil Dibuat!</Text>
             </View>
-            <TouchableOpacity
-              style={styles.successButton}
-              onPress={handleLihatTiket}
-            >
+            <TouchableOpacity style={styles.successButton} onPress={handleLihatTiket}>
               <Text style={styles.successButtonText}>Lihat Tiket</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
-
-      {/* Konten */}
-      <View style={styles.contentBody}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 120 }}
-        >
-          <Text style={styles.mainTitle}>Dokumen Persyaratan</Text>
-          <Text style={styles.infoText}>
-            Untuk mempercepat proses layanan, mohon menyiapkan dokumen-dokumen
-            berikut ini.
-          </Text>
-
-          <View style={styles.card}>
-            {loading ? (
-              <ActivityIndicator
-                size="large"
-                color="#E38E39"
-                style={{ marginVertical: 40 }}
-              />
-            ) : documents.length === 0 ? (
-              <Text style={styles.noDocumentText}>
-                Tidak ada dokumen persyaratan khusus untuk layanan yang Anda
-                pilih.
-              </Text>
-            ) : (
-              documents.map((doc) => (
-                <View key={doc.id} style={styles.documentItem}>
-                  <Ionicons name="checkmark-circle" size={22} color="#28A745" />
-                  <Text style={styles.documentText}>
-                    {doc.name}
-                    {doc.count > 1 && (
-                      <Text style={styles.quantityText}> x{doc.count}</Text>
-                    )}
-                  </Text>
-                </View>
-              ))
-            )}
-          </View>
-        </ScrollView>
-      </View>
-
-      {/* Tombol Ambil Antrean */}
-      <SafeAreaView style={styles.footerWrapper}>
-        <View style={styles.footerInner}>
-          <TouchableOpacity
-            style={[
-              styles.submitButton,
-              isBooking && styles.submitButtonDisabled,
-            ]}
-            onPress={handleAmbilAntreanPress}
-            disabled={isBooking}
-          >
-            {isBooking ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.submitButtonText}>Ambil Antrean</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </SafeAreaView>
+    </View>
   );
 };
 
